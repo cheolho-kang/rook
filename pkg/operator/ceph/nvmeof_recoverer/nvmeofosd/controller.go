@@ -116,9 +116,9 @@ func (r *ReconcileNvmeOfOSD) reconcile(request reconcile.Request) (reconcile.Res
 		return reconcile.Result{}, err
 	}
 
-	// Placeholder for status handling
-	// TODO (cheolho.kang): Need to implement handler
-	return reporting.ReportReconcileResult(logger, r.recorder, request, nvmeOfOSD, reconcile.Result{}, err)
+	// Handle the NvmeOfOSD based on status
+	result, err := r.handleNvmeOfOSDStatus(nvmeOfOSD)
+	return reporting.ReportReconcileResult(logger, r.recorder, request, nvmeOfOSD, result, err)
 }
 
 // fetchNvmeOfOSD retrieves the NvmeOfOSD instance by name and namespace.
@@ -130,4 +130,22 @@ func (r *ReconcileNvmeOfOSD) fetchNvmeOfOSD(request reconcile.Request) (*cephv1.
 		return nil, err
 	}
 	return nvmeOfOSD, nil
+}
+
+// handleNvmeOfOSDStatus processes the NvmeOfOSD based on its current status.
+func (r *ReconcileNvmeOfOSD) handleNvmeOfOSDStatus(nvmeOfOSD *cephv1.NvmeOfOSD) (reconcile.Result, error) {
+	switch nvmeOfOSD.Status.Status {
+	// Placeholder for future status handling
+	// TODO (cheolho.kang): Implement the logic to handle the NvmeOfOSD status
+	case "Creating":
+		logger.Debugf("status changed to %s", nvmeOfOSD.Status.Status)
+		return reconcile.Result{}, nil
+	case "Failed":
+		logger.Debugf("status changed to %s", nvmeOfOSD.Status.Status)
+		return reconcile.Result{}, nil
+	default:
+		// Handle other statuses or do nothing
+		logger.Errorf("unknown status: %s", nvmeOfOSD.Status.Status)
+		return reconcile.Result{}, nil
+	}
 }
