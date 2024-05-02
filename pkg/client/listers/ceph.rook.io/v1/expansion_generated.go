@@ -153,3 +153,11 @@ type CephRBDMirrorListerExpansion interface{}
 // CephRBDMirrorNamespaceListerExpansion allows custom methods to be added to
 // CephRBDMirrorNamespaceLister.
 type CephRBDMirrorNamespaceListerExpansion interface{}
+
+// NvmeOfOSDListerExpansion allows custom methods to be added to
+// NvmeOfOSDLister.
+type NvmeOfOSDListerExpansion interface{}
+
+// NvmeOfOSDNamespaceListerExpansion allows custom methods to be added to
+// NvmeOfOSDNamespaceLister.
+type NvmeOfOSDNamespaceListerExpansion interface{}

@@ -3200,3 +3200,36 @@ const (
 	// Always means the Ceph COSI driver will be deployed even if the object store is not present
 	COSIDeploymentStrategyAlways COSIDeploymentStrategy = "Always"
 )
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// NvmeOfOSD is the Schema for the nvmeofosds API
+type NvmeOfOSD struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec   NvmeOfOSDSpec   `json:"spec,omitempty"`
+	Status NvmeOfOSDStatus `json:"status,omitempty"`
+}
+
+// NvmeOfOSDList contains a list of NvmeOfOSD
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+type NvmeOfOSDList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []NvmeOfOSD `json:"items"`
+}
+
+// NvmeOfOSDSpec defines the desired state of NvmeOfOSD
+type NvmeOfOSDSpec struct {
+	NvmeOfStorageName string `json:"nvmeOfStorageName"`
+	Device            string `json:"device"`
+	VNode             string `json:"vnode"`
+	AttachNode        string `json:"attachNode"`
+}
+
+// NvmeOfOSDStatus defines the observed state of NvmeOfOSD
+type NvmeOfOSDStatus struct {
+	Status string `json:"status"`
+}

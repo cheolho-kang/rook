@@ -51,3 +51,5 @@ type CephObjectZoneExpansion interface{}
 type CephObjectZoneGroupExpansion interface{}
 
 type CephRBDMirrorExpansion interface{}
+
+type NvmeOfOSDExpansion interface{}
