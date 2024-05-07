@@ -41,6 +41,8 @@ Resource Types:
 <a href="#ceph.rook.io/v1.CephObjectZoneGroup">CephObjectZoneGroup</a>
 </li><li>
 <a href="#ceph.rook.io/v1.CephRBDMirror">CephRBDMirror</a>
+</li><li>
+<a href="#ceph.rook.io/v1.NvmeOfStorage">NvmeOfStorage</a>
 </li></ul>
 <h3 id="ceph.rook.io/v1.CephBlockPool">CephBlockPool
 </h3>
@@ -2480,6 +2482,112 @@ Status
 </td>
 <td>
 <em>(Optional)</em>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ceph.rook.io/v1.NvmeOfStorage">NvmeOfStorage
+</h3>
+<div>
+<p>NvmeOfStorage is the Schema for the nvmeofstorages API</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>apiVersion</code><br/>
+string</td>
+<td>
+<code>
+ceph.rook.io/v1
+</code>
+</td>
+</tr>
+<tr>
+<td>
+<code>kind</code><br/>
+string
+</td>
+<td><code>NvmeOfStorage</code></td>
+</tr>
+<tr>
+<td>
+<code>metadata</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#objectmeta-v1-meta">
+Kubernetes meta/v1.ObjectMeta
+</a>
+</em>
+</td>
+<td>
+Refer to the Kubernetes API documentation for the fields of the
+<code>metadata</code> field.
+</td>
+</tr>
+<tr>
+<td>
+<code>spec</code><br/>
+<em>
+<a href="#ceph.rook.io/v1.NvmeOfStorageSpec">
+NvmeOfStorageSpec
+</a>
+</em>
+</td>
+<td>
+<br/>
+<br/>
+<table>
+<tr>
+<td>
+<code>name</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>ip</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>devices</code><br/>
+<em>
+<a href="#ceph.rook.io/v1.FabricDevice">
+[]FabricDevice
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td>
+<code>status</code><br/>
+<em>
+<a href="#ceph.rook.io/v1.NvmeOfStorageStatus">
+NvmeOfStorageStatus
+</a>
+</em>
+</td>
+<td>
 </td>
 </tr>
 </tbody>
@@ -5789,6 +5897,64 @@ A policy can however contain multiple count-time period pairs in order to specif
 </tr>
 </tbody>
 </table>
+<h3 id="ceph.rook.io/v1.FabricDevice">FabricDevice
+</h3>
+<p>
+(<em>Appears on:</em><a href="#ceph.rook.io/v1.NvmeOfStorageSpec">NvmeOfStorageSpec</a>)
+</p>
+<div>
+<p>FabricDevice represents a fabric device connected to a node</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>subnqn</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>port</code><br/>
+<em>
+int
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>attachedNode</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>deviceName</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="ceph.rook.io/v1.FilesystemMirrorInfoPeerSpec">FilesystemMirrorInfoPeerSpec
 </h3>
 <p>
@@ -8850,6 +9016,83 @@ string
 </td>
 <td>
 <p>Value to filter on</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ceph.rook.io/v1.NvmeOfStorageSpec">NvmeOfStorageSpec
+</h3>
+<p>
+(<em>Appears on:</em><a href="#ceph.rook.io/v1.NvmeOfStorage">NvmeOfStorage</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>ip</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>devices</code><br/>
+<em>
+<a href="#ceph.rook.io/v1.FabricDevice">
+[]FabricDevice
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ceph.rook.io/v1.NvmeOfStorageStatus">NvmeOfStorageStatus
+</h3>
+<p>
+(<em>Appears on:</em><a href="#ceph.rook.io/v1.NvmeOfStorage">NvmeOfStorage</a>)
+</p>
+<div>
+<p>NvmeOfStorageStatus defines the observed state of NvmeOStorage</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>status</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
 </td>
 </tr>
 </tbody>
