@@ -96,6 +96,10 @@ func (c *FakeCephV1) CephRBDMirrors(namespace string) v1.CephRBDMirrorInterface 
 	return &FakeCephRBDMirrors{c, namespace}
 }
 
+func (c *FakeCephV1) NvmeOfStorages(namespace string) v1.NvmeOfStorageInterface {
+	return &FakeNvmeOfStorages{c, namespace}
+}
+
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeCephV1) RESTClient() rest.Interface {

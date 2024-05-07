@@ -43,6 +43,7 @@ type CephV1Interface interface {
 	CephObjectZonesGetter
 	CephObjectZoneGroupsGetter
 	CephRBDMirrorsGetter
+	NvmeOfStoragesGetter
 }
 
 // CephV1Client is used to interact with features provided by the ceph.rook.io group.
@@ -116,6 +117,10 @@ func (c *CephV1Client) CephObjectZoneGroups(namespace string) CephObjectZoneGrou
 
 func (c *CephV1Client) CephRBDMirrors(namespace string) CephRBDMirrorInterface {
 	return newCephRBDMirrors(c, namespace)
+}
+
+func (c *CephV1Client) NvmeOfStorages(namespace string) NvmeOfStorageInterface {
+	return newNvmeOfStorages(c, namespace)
 }
 
 // NewForConfig creates a new CephV1Client for the given config.

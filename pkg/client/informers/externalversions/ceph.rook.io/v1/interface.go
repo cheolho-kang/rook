@@ -58,6 +58,8 @@ type Interface interface {
 	CephObjectZoneGroups() CephObjectZoneGroupInformer
 	// CephRBDMirrors returns a CephRBDMirrorInformer.
 	CephRBDMirrors() CephRBDMirrorInformer
+	// NvmeOfStorages returns a NvmeOfStorageInformer.
+	NvmeOfStorages() NvmeOfStorageInformer
 }
 
 type version struct {
@@ -154,4 +156,9 @@ func (v *version) CephObjectZoneGroups() CephObjectZoneGroupInformer {
 // CephRBDMirrors returns a CephRBDMirrorInformer.
 func (v *version) CephRBDMirrors() CephRBDMirrorInformer {
 	return &cephRBDMirrorInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// NvmeOfStorages returns a NvmeOfStorageInformer.
+func (v *version) NvmeOfStorages() NvmeOfStorageInformer {
+	return &nvmeOfStorageInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
