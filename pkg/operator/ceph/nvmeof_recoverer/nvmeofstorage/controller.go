@@ -28,6 +28,7 @@ import (
 	cephv1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1"
 	"github.com/rook/rook/pkg/clusterd"
 	opcontroller "github.com/rook/rook/pkg/operator/ceph/controller"
+	"github.com/rook/rook/pkg/operator/ceph/nvmeof_recoverer/clustermanager"
 	"github.com/rook/rook/pkg/operator/ceph/reporting"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -110,9 +111,32 @@ func (r *ReconcileNvmeOfStorage) Reconcile(context context.Context, request reco
 func (r *ReconcileNvmeOfStorage) reconcile(request reconcile.Request) (reconcile.Result, error) {
 	logger.Debugf("reconciling NvmeOfStorage. Request.Namespace: %s, Request.Name: %s", request.Namespace, request.Name)
 
-	// TODO (cheolho.kang): Implement the reconclie logic later
+	// Fetch the NvmeOfStorage CRD object
+	nvmeOfStorage := &cephv1.NvmeOfStorage{}
+	err := r.fetchNvmeOfStorage(nvmeOfStorage, request)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
 
-	// Return and do not requeue
-	logger.Debug("done reconciling")
-	return reporting.ReportReconcileResult(logger, r.recorder, request, nil, reconcile.Result{}, nil)
+	// Update the crush map with the devices in the NvmeOfStorage CR
+	for _, device := range nvmeOfStorage.Spec.Devices {
+		err := clustermanager.UpdateCrushMapForOSD(r.context, "rook-ceph", "my-cluster", device.AttachedNode, device.DeviceName, "fabric-host-"+nvmeOfStorage.Spec.Name)
+		if err != nil {
+			logger.Debugf("failed to update CRUSH Map. targetNode: %s, targetDevice: %s, err: %s", device.AttachedNode, device.DeviceName, err)
+			continue
+		}
+		logger.Debugf("successfully updated CRUSH Map. targetNode: %s, targetDevice: %s", device.AttachedNode, device.DeviceName)
+	}
+
+	return reporting.ReportReconcileResult(logger, r.recorder, request, nvmeOfStorage, reconcile.Result{}, err)
+}
+
+// fetchNvmeOfOSD retrieves the NvmeOfOSD instance by name and namespace.
+func (r *ReconcileNvmeOfStorage) fetchNvmeOfStorage(nvmeOfStorage *cephv1.NvmeOfStorage, request reconcile.Request) error {
+	err := r.client.Get(r.opManagerContext, request.NamespacedName, nvmeOfStorage)
+	if err != nil {
+		logger.Errorf("unable to fetch NvmeOfStorage, err: %v", err)
+		return err
+	}
+	return nil
 }
