@@ -110,9 +110,24 @@ func (r *ReconcileNvmeOfStorage) Reconcile(context context.Context, request reco
 func (r *ReconcileNvmeOfStorage) reconcile(request reconcile.Request) (reconcile.Result, error) {
 	logger.Debug("reconciling NvmeOfStorage", "Request.Namespace", request.Namespace, "Request.Name", request.Name)
 
-	// TODO (cheolho.kang): Implement the reconclie logic later
+	// Fetch the NvmeOfStorage CRD object
+	nvmeOfOSD, err := r.fetchNvmeOfStorage(request)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
 
-	// Return and do not requeue
-	logger.Debug("done reconciling")
-	return reporting.ReportReconcileResult(logger, r.recorder, request, nil, reconcile.Result{}, nil)
+	// Placeholder for generating nvmeofosd CRs
+	// TODO (cheolho.kang): Need to implement handler
+	return reporting.ReportReconcileResult(logger, r.recorder, request, nvmeOfOSD, reconcile.Result{}, err)
+}
+
+// fetchNvmeOfOSD retrieves the NvmeOfOSD instance by name and namespace.
+func (r *ReconcileNvmeOfStorage) fetchNvmeOfStorage(request reconcile.Request) (*cephv1.NvmeOfStorage, error) {
+	nvmeOfOSD := &cephv1.NvmeOfStorage{}
+	err := r.client.Get(r.opManagerContext, request.NamespacedName, nvmeOfOSD)
+	if err != nil {
+		logger.Error(err, "unable to fetch NvmeOfStorage", "Request.Namespace", request.Namespace, "Request.Name", request.Name)
+		return nil, err
+	}
+	return nvmeOfOSD, nil
 }
