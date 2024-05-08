@@ -84,7 +84,17 @@ metadata:
     app.kubernetes.io/name: cosi-driver-ceph
 rules:
   - apiGroups: ["objectstorage.k8s.io"]
-    resources: ["buckets", "bucketaccesses", "bucketclaims", "bucketaccessclasses", "buckets/status", "bucketaccesses/status", "bucketclaims/status", "bucketaccessclasses/status"]
+    resources:
+      [
+        "buckets",
+        "bucketaccesses",
+        "bucketclaims",
+        "bucketaccessclasses",
+        "buckets/status",
+        "bucketaccesses/status",
+        "bucketclaims/status",
+        "bucketaccessclasses/status",
+      ]
     verbs: ["get", "list", "watch", "update", "create", "delete"]
   - apiGroups: ["coordination.k8s.io"]
     resources: ["leases"]
@@ -316,6 +326,7 @@ rules:
       - cephfilesystemsubvolumegroups
       - cephblockpoolradosnamespaces
       - cephcosidrivers
+      - nvmeofstorages
     verbs:
       - get
       - list
@@ -341,6 +352,7 @@ rules:
       - cephfilesystemmirrors/status
       - cephfilesystemsubvolumegroups/status
       - cephblockpoolradosnamespaces/status
+      - nvmeofstorages/status
     verbs: ["update"]
   # The "*/finalizers" permission may need to be strictly given for K8s clusters where
   # OwnerReferencesPermissionEnforcement is enabled so that Rook can set blockOwnerDeletion on
@@ -364,6 +376,7 @@ rules:
       - cephfilesystemmirrors/finalizers
       - cephfilesystemsubvolumegroups/finalizers
       - cephblockpoolradosnamespaces/finalizers
+      - nvmeofstorages/finalizers
     verbs: ["update"]
   - apiGroups:
       - policy
@@ -581,7 +594,8 @@ rules:
     verbs: ["create"]
   - apiGroups: ["csiaddons.openshift.io"]
     resources: ["networkfences"]
-    verbs: ["create", "get", "update", "delete", "watch", "list", "deletecollection"]
+    verbs:
+      ["create", "get", "update", "delete", "watch", "list", "deletecollection"]
   - apiGroups: ["apiextensions.k8s.io"]
     resources: ["customresourcedefinitions"]
     verbs: ["get"]
@@ -858,7 +872,7 @@ rules:
       - patch
       - delete
   - apiGroups:
-      - ''
+      - ""
     resources:
       - persistentvolumeclaims
     verbs:
