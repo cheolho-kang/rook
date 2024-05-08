@@ -146,6 +146,7 @@ rules:
   - cephblockpoolradosnamespaces
   - cephcosidrivers
   - nvmeofstorages
+  - nvmeofosds
   verbs:
   - get
   - list
@@ -172,6 +173,7 @@ rules:
   - cephfilesystemsubvolumegroups/status
   - cephblockpoolradosnamespaces/status
   - nvmeofstorages/status
+  - nvmeofosds/status
   verbs: ["update"]
 # The "*/finalizers" permission may need to be strictly given for K8s clusters where
 # OwnerReferencesPermissionEnforcement is enabled so that Rook can set blockOwnerDeletion on
@@ -196,6 +198,7 @@ rules:
   - cephfilesystemsubvolumegroups/finalizers
   - cephblockpoolradosnamespaces/finalizers
   - nvmeofstorages/finalizers
+  - nvmeofosds/finalizers
   verbs: ["update"]
 - apiGroups:
   - policy

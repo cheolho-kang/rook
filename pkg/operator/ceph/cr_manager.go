@@ -33,6 +33,7 @@ import (
 	"github.com/rook/rook/pkg/operator/ceph/file/mirror"
 	"github.com/rook/rook/pkg/operator/ceph/file/subvolumegroup"
 	"github.com/rook/rook/pkg/operator/ceph/nfs"
+	"github.com/rook/rook/pkg/operator/ceph/nvmeof_recoverer/nvmeofosd"
 	"github.com/rook/rook/pkg/operator/ceph/nvmeof_recoverer/nvmeofstorage"
 	"github.com/rook/rook/pkg/operator/ceph/object"
 	"github.com/rook/rook/pkg/operator/ceph/object/bucket"
@@ -95,6 +96,7 @@ var AddToManagerFuncs = []func(manager.Manager, *clusterd.Context, context.Conte
 	radosnamespace.Add,
 	cosi.Add,
 	nvmeofstorage.Add,
+	nvmeofosd.Add,
 }
 
 // AddToManagerOpFunc is a list of functions to add all Controllers to the Manager (entrypoint for

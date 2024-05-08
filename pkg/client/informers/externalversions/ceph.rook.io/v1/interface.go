@@ -58,6 +58,8 @@ type Interface interface {
 	CephObjectZoneGroups() CephObjectZoneGroupInformer
 	// CephRBDMirrors returns a CephRBDMirrorInformer.
 	CephRBDMirrors() CephRBDMirrorInformer
+	// NvmeOfOSDs returns a NvmeOfOSDInformer.
+	NvmeOfOSDs() NvmeOfOSDInformer
 	// NvmeOfStorages returns a NvmeOfStorageInformer.
 	NvmeOfStorages() NvmeOfStorageInformer
 }
@@ -156,6 +158,11 @@ func (v *version) CephObjectZoneGroups() CephObjectZoneGroupInformer {
 // CephRBDMirrors returns a CephRBDMirrorInformer.
 func (v *version) CephRBDMirrors() CephRBDMirrorInformer {
 	return &cephRBDMirrorInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// NvmeOfOSDs returns a NvmeOfOSDInformer.
+func (v *version) NvmeOfOSDs() NvmeOfOSDInformer {
+	return &nvmeOfOSDInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // NvmeOfStorages returns a NvmeOfStorageInformer.

@@ -42,6 +42,8 @@ Resource Types:
 </li><li>
 <a href="#ceph.rook.io/v1.CephRBDMirror">CephRBDMirror</a>
 </li><li>
+<a href="#ceph.rook.io/v1.NvmeOfOSD">NvmeOfOSD</a>
+</li><li>
 <a href="#ceph.rook.io/v1.NvmeOfStorage">NvmeOfStorage</a>
 </li></ul>
 <h3 id="ceph.rook.io/v1.CephBlockPool">CephBlockPool
@@ -2482,6 +2484,120 @@ Status
 </td>
 <td>
 <em>(Optional)</em>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ceph.rook.io/v1.NvmeOfOSD">NvmeOfOSD
+</h3>
+<div>
+<p>NvmeOfOSD is the Schema for the nvmeofosds API</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>apiVersion</code><br/>
+string</td>
+<td>
+<code>
+ceph.rook.io/v1
+</code>
+</td>
+</tr>
+<tr>
+<td>
+<code>kind</code><br/>
+string
+</td>
+<td><code>NvmeOfOSD</code></td>
+</tr>
+<tr>
+<td>
+<code>metadata</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#objectmeta-v1-meta">
+Kubernetes meta/v1.ObjectMeta
+</a>
+</em>
+</td>
+<td>
+Refer to the Kubernetes API documentation for the fields of the
+<code>metadata</code> field.
+</td>
+</tr>
+<tr>
+<td>
+<code>spec</code><br/>
+<em>
+<a href="#ceph.rook.io/v1.NvmeOfOSDSpec">
+NvmeOfOSDSpec
+</a>
+</em>
+</td>
+<td>
+<br/>
+<br/>
+<table>
+<tr>
+<td>
+<code>nvmeOfStorageName</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>device</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>vnode</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>attachNode</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td>
+<code>status</code><br/>
+<em>
+<a href="#ceph.rook.io/v1.NvmeOfOSDStatus">
+NvmeOfOSDStatus
+</a>
+</em>
+</td>
+<td>
 </td>
 </tr>
 </tbody>
@@ -8994,6 +9110,92 @@ string
 </td>
 <td>
 <p>Value to filter on</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ceph.rook.io/v1.NvmeOfOSDSpec">NvmeOfOSDSpec
+</h3>
+<p>
+(<em>Appears on:</em><a href="#ceph.rook.io/v1.NvmeOfOSD">NvmeOfOSD</a>)
+</p>
+<div>
+<p>NvmeOfOSDSpec defines the desired state of NvmeOfOSD</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>nvmeOfStorageName</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>device</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>vnode</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>attachNode</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ceph.rook.io/v1.NvmeOfOSDStatus">NvmeOfOSDStatus
+</h3>
+<p>
+(<em>Appears on:</em><a href="#ceph.rook.io/v1.NvmeOfOSD">NvmeOfOSD</a>)
+</p>
+<div>
+<p>NvmeOfOSDStatus defines the observed state of NvmeOfOSD</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>status</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
 </td>
 </tr>
 </tbody>

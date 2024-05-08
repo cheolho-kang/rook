@@ -43,6 +43,7 @@ type CephV1Interface interface {
 	CephObjectZonesGetter
 	CephObjectZoneGroupsGetter
 	CephRBDMirrorsGetter
+	NvmeOfOSDsGetter
 	NvmeOfStoragesGetter
 }
 
@@ -117,6 +118,10 @@ func (c *CephV1Client) CephObjectZoneGroups(namespace string) CephObjectZoneGrou
 
 func (c *CephV1Client) CephRBDMirrors(namespace string) CephRBDMirrorInterface {
 	return newCephRBDMirrors(c, namespace)
+}
+
+func (c *CephV1Client) NvmeOfOSDs(namespace string) NvmeOfOSDInterface {
+	return newNvmeOfOSDs(c, namespace)
 }
 
 func (c *CephV1Client) NvmeOfStorages(namespace string) NvmeOfStorageInterface {

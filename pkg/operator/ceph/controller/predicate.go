@@ -463,7 +463,37 @@ func WatchControllerPredicate() predicate.Funcs {
 				if isUpgrade {
 					return true
 				}
+			case *cephv1.NvmeOfOSD:
+				objNew := e.ObjectNew.(*cephv1.NvmeOfOSD)
+				logger.Debug("update event on NVMeoFOSD CR")
+				// If the labels "do_not_reconcile" is set on the object, let's not reconcile that request
+				IsDoNotReconcile := IsDoNotReconcile(objNew.GetLabels())
+				if IsDoNotReconcile {
+					logger.Debugf("object %q matched on update but %q label is set, doing nothing", DoNotReconcileLabelName, objNew.Name)
+					return false
+				}
 
+				statusDiff := cmp.Diff(objOld.Status, objNew.Status)
+				if statusDiff != "" {
+					logger.Infof("CR status has changed for %q. diff=%s", objNew.Name, statusDiff)
+					return true
+				}
+				specDiff := cmp.Diff(objOld.Spec, objNew.Spec, resourceQtyComparer)
+				if specDiff != "" {
+					logger.Infof("CR spec has changed for %q. diff=%s", objNew.Name, specDiff)
+					return true
+				}
+				if objectToBeDeleted(objOld, objNew) {
+					logger.Debugf("CR %q is going be deleted", objNew.Name)
+					return true
+				} else if objOld.GetGeneration() != objNew.GetGeneration() {
+					logger.Debugf("skipping resource %q update with unchanged spec", objNew.Name)
+				}
+				// Handling upgrades
+				isUpgrade := isUpgrade(objOld.GetLabels(), objNew.GetLabels())
+				if isUpgrade {
+					return true
+				}
 			}
 			return false
 		},

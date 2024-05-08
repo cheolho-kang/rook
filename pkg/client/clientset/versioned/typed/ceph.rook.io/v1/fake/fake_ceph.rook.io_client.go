@@ -96,6 +96,10 @@ func (c *FakeCephV1) CephRBDMirrors(namespace string) v1.CephRBDMirrorInterface 
 	return &FakeCephRBDMirrors{c, namespace}
 }
 
+func (c *FakeCephV1) NvmeOfOSDs(namespace string) v1.NvmeOfOSDInterface {
+	return &FakeNvmeOfOSDs{c, namespace}
+}
+
 func (c *FakeCephV1) NvmeOfStorages(namespace string) v1.NvmeOfStorageInterface {
 	return &FakeNvmeOfStorages{c, namespace}
 }

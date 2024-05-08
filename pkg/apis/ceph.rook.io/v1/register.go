@@ -91,6 +91,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&CephCOSIDriverList{},
 		&NvmeOfStorage{},
 		&NvmeOfStorageList{},
+		&NvmeOfOSD{},
+		&NvmeOfOSDList{},
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	scheme.AddKnownTypes(bktv1alpha1.SchemeGroupVersion,
