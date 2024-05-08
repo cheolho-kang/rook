@@ -263,6 +263,11 @@ rules:
   - network-attachment-definitions
   verbs:
   - get
+- apiGroups: ["ceph.rook.io"]
+  resources:
+  - nvmeofosds
+  verbs:
+  - create
 ---
 # Aspects of ceph-mgr that require cluster-wide access
 kind: ClusterRole

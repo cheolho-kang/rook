@@ -3257,8 +3257,11 @@ type NvmeOfOSDList struct {
 
 // NvmeOfOSDSpec defines the desired state of NvmeOfOSD
 type NvmeOfOSDSpec struct {
+	Name              string `json:"name"`
 	NvmeOfStorageName string `json:"nvmeOfStorageName"`
-	Device            string `json:"device"`
+	IP                string `json:"ip"`
+	Port              int    `json:"port"`
+	SubNQN            string `json:"subnqn"`
 	VNode             string `json:"vnode"`
 	AttachNode        string `json:"attachNode"`
 }

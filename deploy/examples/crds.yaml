@@ -13087,16 +13087,25 @@ spec:
               properties:
                 attachNode:
                   type: string
-                device:
+                ip:
+                  type: string
+                name:
                   type: string
                 nvmeOfStorageName:
+                  type: string
+                port:
+                  type: integer
+                subnqn:
                   type: string
                 vnode:
                   type: string
               required:
                 - attachNode
-                - device
+                - ip
+                - name
                 - nvmeOfStorageName
+                - port
+                - subnqn
                 - vnode
               type: object
             status:

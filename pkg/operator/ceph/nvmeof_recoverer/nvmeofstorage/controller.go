@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strconv"
 
 	"emperror.dev/errors"
 	"github.com/coreos/pkg/capnslog"
@@ -116,8 +117,11 @@ func (r *ReconcileNvmeOfStorage) reconcile(request reconcile.Request) (reconcile
 		return reconcile.Result{}, err
 	}
 
-	// Placeholder for generating nvmeofosd CRs
-	// TODO (cheolho.kang): Need to implement handler
+	err = r.createNvmeOfOSD(nvmeOfOSD)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
 	return reporting.ReportReconcileResult(logger, r.recorder, request, nvmeOfOSD, reconcile.Result{}, err)
 }
 
@@ -130,4 +134,36 @@ func (r *ReconcileNvmeOfStorage) fetchNvmeOfStorage(request reconcile.Request) (
 		return nil, err
 	}
 	return nvmeOfOSD, nil
+}
+
+// createNvmeOfOSD creates NvmeOfOSD CRs for each device in the NvmeOfStorage CR.
+func (r *ReconcileNvmeOfStorage) createNvmeOfOSD(nvmeOfStorage *cephv1.NvmeOfStorage) error {
+	for index, device := range nvmeOfStorage.Spec.Devices {
+		osdName := nvmeOfStorage.Spec.Name + "-osd-" + strconv.Itoa(index)
+		namespace := nvmeOfStorage.Namespace
+		nvmeOfOSD := &cephv1.NvmeOfOSD{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      osdName,
+				Namespace: namespace,
+			},
+			Spec: cephv1.NvmeOfOSDSpec{
+				Name:              "osd-" + strconv.Itoa(index),
+				NvmeOfStorageName: nvmeOfStorage.Spec.Name,
+				IP:                nvmeOfStorage.Spec.IP,
+				Port:              device.Port,
+				SubNQN:            device.SubNQN,
+				VNode:             "vnode_" + osdName,
+				AttachNode:        device.AttachedNode,
+			},
+			Status: cephv1.NvmeOfOSDStatus{
+				Status: "Creating",
+			},
+		}
+		err := r.client.Create(r.opManagerContext, nvmeOfOSD)
+		if err != nil {
+			logger.Errorf("failed to create NvmeOfOSD %s. %+v", osdName, err)
+			return err
+		}
+	}
+	return nil
 }
