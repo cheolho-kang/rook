@@ -28,6 +28,7 @@ import (
 	cephv1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1"
 	"github.com/rook/rook/pkg/clusterd"
 	opcontroller "github.com/rook/rook/pkg/operator/ceph/controller"
+	"github.com/rook/rook/pkg/operator/ceph/nvmeof_recoverer/clustermanager"
 	"github.com/rook/rook/pkg/operator/ceph/reporting"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -116,8 +117,16 @@ func (r *ReconcileNvmeOfStorage) reconcile(request reconcile.Request) (reconcile
 		return reconcile.Result{}, err
 	}
 
-	// Placeholder for updating the crush map
-	// TODO (cheolho.kang): Need to implement handler
+	// Update the crush map with the devices in the NvmeOfStorage CR
+	for _, device := range nvmeOfStorage.Spec.Devices {
+		err := clustermanager.UpdateCrushMapForOSD(r.context, "rook-ceph", "my-cluster", device.AttachedNode, device.DeviceName, "fabric-host-"+nvmeOfStorage.Spec.Name)
+		if err != nil {
+			logger.Debugf("failed to update CRUSH Map. targetNode: %s, targetDevice: %s, err: %s", device.AttachedNode, device.DeviceName, err)
+			continue
+		}
+		logger.Debugf("successfully updated CRUSH Map. targetNode: %s, targetDevice: %s", device.AttachedNode, device.DeviceName)
+	}
+
 	return reporting.ReportReconcileResult(logger, r.recorder, request, nvmeOfStorage, reconcile.Result{}, err)
 }
 
