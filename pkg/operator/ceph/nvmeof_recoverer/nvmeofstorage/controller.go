@@ -22,16 +22,22 @@ import (
 	"fmt"
 	"reflect"
 
+	"emperror.dev/errors"
 	"github.com/coreos/pkg/capnslog"
 
 	cephv1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1"
 	"github.com/rook/rook/pkg/clusterd"
 	opcontroller "github.com/rook/rook/pkg/operator/ceph/controller"
+	"github.com/rook/rook/pkg/operator/ceph/reporting"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
 const (
@@ -48,6 +54,8 @@ var controllerTypeMeta = metav1.TypeMeta{
 	APIVersion: fmt.Sprintf("%s/%s", cephv1.CustomResourceGroup, cephv1.Version),
 }
 
+var _ reconcile.Reconciler = &ReconcileNvmeOfStorage{}
+
 // ReconcileNvmeOfStorage reconciles a NvmeOfStorage object
 type ReconcileNvmeOfStorage struct {
 	client           client.Client
@@ -60,12 +68,51 @@ type ReconcileNvmeOfStorage struct {
 // Add creates a new NvmeOfStorage Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager, context *clusterd.Context, opManagerContext context.Context, opConfig opcontroller.OperatorConfig) error {
-	return add()
+	return add(mgr, newReconciler(mgr, context, opManagerContext))
 }
 
-func add() error {
+// newReconciler returns a new reconcile.Reconciler
+func newReconciler(mgr manager.Manager, context *clusterd.Context, opManagerContext context.Context) reconcile.Reconciler {
+	return &ReconcileNvmeOfStorage{
+		client:           mgr.GetClient(),
+		context:          context,
+		scheme:           mgr.GetScheme(),
+		opManagerContext: opManagerContext,
+		recorder:         mgr.GetEventRecorderFor("rook-" + controllerName),
+	}
+}
+
+func add(mgr manager.Manager, r reconcile.Reconciler) error {
+	// Create a new controller
+	c, err := controller.New(controllerName, mgr, controller.Options{Reconciler: r})
+	if err != nil {
+		return errors.Wrapf(err, "failed to create %s controller", controllerName)
+	}
 	logger.Info("successfully started")
 
-	// Placeholder for future code to register the reconciler with the controller
+	// Watch for changes on the NvmeOfStorage CRD object
+	cmKind := source.Kind(
+		mgr.GetCache(),
+		&cephv1.NvmeOfStorage{TypeMeta: controllerTypeMeta})
+	err = c.Watch(cmKind, &handler.EnqueueRequestForObject{}, opcontroller.WatchControllerPredicate())
+	if err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func (r *ReconcileNvmeOfStorage) Reconcile(context context.Context, request reconcile.Request) (reconcile.Result, error) {
+	reconcileResponse, err := r.reconcile(request)
+	return reconcileResponse, err
+}
+
+func (r *ReconcileNvmeOfStorage) reconcile(request reconcile.Request) (reconcile.Result, error) {
+	logger.Debugf("reconciling NvmeOfStorage. Request.Namespace: %s, Request.Name: %s", request.Namespace, request.Name)
+
+	// TODO (cheolho.kang): Implement the reconclie logic later
+
+	// Return and do not requeue
+	logger.Debug("done reconciling")
+	return reporting.ReportReconcileResult(logger, r.recorder, request, nil, reconcile.Result{}, nil)
 }
