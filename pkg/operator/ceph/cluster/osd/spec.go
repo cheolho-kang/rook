@@ -20,8 +20,9 @@ package osd
 import (
 	"fmt"
 	"path"
-	"path/filepath"
+	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 	cephv1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1"
@@ -427,7 +428,7 @@ func (c *Cluster) makeDeployment(osdProps osdProperties, osd OSDInfo, provisionC
 		"--fsid", c.clusterInfo.FSID,
 		"--setuser", "ceph",
 		"--setgroup", "ceph",
-		fmt.Sprintf("--crush-location=%s", osd.Location),
+		fmt.Sprintf("--crush-location=\"%s\"", osd.Location),
 	}...)
 
 	// Ceph expects initial weight as float value in tera-bytes units
@@ -588,7 +589,7 @@ func (c *Cluster) makeDeployment(osdProps osdProperties, osd OSDInfo, provisionC
 		// so that it can pick the already mounted/activated osd metadata path
 		// This container will activate the OSD and place the activated files into an empty dir
 		// The empty dir will be shared by the "activate-osd" pod and the "osd" main pod
-		activateOSDVolume, activateOSDContainer := c.getActivateOSDInitContainer(c.spec.DataDirHostPath, c.clusterInfo.Namespace, osdID, osd, osdProps)
+		activateOSDVolume, activateOSDContainer := c.getActivateOSDInitContainer(osdID, osd, osdProps)
 		volumes = append(volumes, activateOSDVolume...)
 		volumeMounts = append(volumeMounts, activateOSDContainer.VolumeMounts[0])
 		initContainers = append(initContainers, *activateOSDContainer)
@@ -612,6 +613,7 @@ func (c *Cluster) makeDeployment(osdProps osdProperties, osd OSDInfo, provisionC
 		))
 
 	envVars = append(envVars, controller.ApplyNetworkEnv(&c.spec)...)
+	mountActivateOSDPathCmd := getMountOSDPartitionCmd(osd)
 	podTemplateSpec := v1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   AppName,
@@ -626,8 +628,10 @@ func (c *Cluster) makeDeployment(osdProps osdProperties, osd OSDInfo, provisionC
 			InitContainers:     initContainers,
 			Containers: []v1.Container{
 				{
-					Command:         getOSDCmd(command, c.spec.Storage.FlappingRestartIntervalHours),
-					Args:            args,
+					Command: []string{
+						"/bin/sh",
+						"-c",
+						mountActivateOSDPathCmd + " && " + strings.Join(command, " ") + " " + strings.Join(args, " ")},
 					Name:            "osd",
 					Image:           c.spec.CephVersion.Image,
 					ImagePullPolicy: controller.GetContainerImagePullPolicy(c.spec.CephVersion.ImagePullPolicy),
@@ -841,27 +845,20 @@ func (c *Cluster) getCopyBinariesContainer() (v1.Volume, *v1.Container) {
 }
 
 // This container runs all the actions needed to activate an OSD before we can run the OSD process
-func (c *Cluster) getActivateOSDInitContainer(configDir, namespace, osdID string, osdInfo OSDInfo, osdProps osdProperties) ([]v1.Volume, *v1.Container) {
-	// We need to use hostPath because the same reason as written in the comment of getDataBridgeVolumeSource()
-
+func (c *Cluster) getActivateOSDInitContainer(osdID string, osdInfo OSDInfo, osdProps osdProperties) ([]v1.Volume, *v1.Container) {
 	hostPathType := v1.HostPathDirectoryOrCreate
 	source := v1.VolumeSource{
 		HostPath: &v1.HostPathVolumeSource{
-			Path: filepath.Join(
-				configDir,
-				namespace,
-				c.clusterInfo.FSID+"_"+osdInfo.UUID,
-			),
+			Path: "/tmp/" + c.clusterInfo.FSID + "_" + osdInfo.UUID,
 			Type: &hostPathType,
 		},
 	}
-	volume := []v1.Volume{
-		{
-			Name:         activateOSDVolumeName,
-			VolumeSource: source,
-		},
+	var volume []v1.Volume
+	tmpVolume := v1.Volume{
+		Name:         activateOSDVolumeName,
+		VolumeSource: source,
 	}
-
+	volume = append(volume, tmpVolume)
 	envVars := append(
 		osdActivateEnvVar(),
 		blockPathEnvVariable(osdInfo.BlockPath),
@@ -870,13 +867,10 @@ func (c *Cluster) getActivateOSDInitContainer(configDir, namespace, osdID string
 		v1.EnvVar{Name: "ROOK_OSD_ID", Value: osdID},
 	)
 
-	// Build empty dir osd path to something like "/var/lib/ceph/osd/ceph-0"
-	activateOSDMountPathID := activateOSDMountPath + osdID
-
 	adminKeyringVol, adminKeyringVolMount := cephkey.Volume().Admin(), cephkey.VolumeMount().Admin()
 	volume = append(volume, adminKeyringVol)
 	volMounts := []v1.VolumeMount{
-		{Name: activateOSDVolumeName, MountPath: activateOSDMountPathID},
+		{Name: activateOSDVolumeName, MountPath: "/tmp/ceph-activate"},
 		{Name: "devices", MountPath: "/dev"},
 		{Name: k8sutil.ConfigOverrideName, ReadOnly: true, MountPath: tempEtcCephDir},
 		adminKeyringVolMount,
@@ -888,11 +882,12 @@ func (c *Cluster) getActivateOSDInitContainer(configDir, namespace, osdID string
 
 	osdStoreFlag := c.spec.Storage.GetOSDStoreFlag()
 
+	mountActivateOSDPathCmd := getMountOSDPartitionCmd(osdInfo) + " && "
 	container := &v1.Container{
 		Command: []string{
 			"/bin/bash",
 			"-c",
-			fmt.Sprintf(activateOSDOnNodeCode, c.clusterInfo.FSID, osdInfo.UUID, osdStoreFlag, osdInfo.CVMode, blockPathVarName),
+			mountActivateOSDPathCmd + fmt.Sprintf(activateOSDOnNodeCode, c.clusterInfo.FSID, osdInfo.UUID, osdStoreFlag, osdInfo.CVMode, blockPathVarName),
 		},
 		Name:            "activate",
 		Image:           c.spec.CephVersion.Image,
@@ -1289,17 +1284,16 @@ func (c *Cluster) getExpandPVCInitContainer(osdProps osdProperties, osdID string
 func (c *Cluster) getExpandInitContainer(osdProps osdProperties, configDir, namespace, osdID string, osdInfo OSDInfo) v1.Container {
 	// Output example is in the comments at the beginning of `getExpandPVCInitContainer()`.
 	osdDataPath := activateOSDMountPath + osdID
-
+	mountActivateOSDPathCmd := getMountOSDPartitionCmd(osdInfo) + " && "
 	return v1.Container{
 		Name:            expandOSDInitContainer,
 		Image:           c.spec.CephVersion.Image,
 		ImagePullPolicy: controller.GetContainerImagePullPolicy(c.spec.CephVersion.ImagePullPolicy),
 		Command: []string{
-			"ceph-bluestore-tool",
-		},
-		Args: []string{"bluefs-bdev-expand", "--path", osdDataPath},
+			"/bin/sh",
+			"-c",
+			mountActivateOSDPathCmd + "ceph-bluestore-tool bluefs-bdev-expand --path " + osdDataPath},
 		VolumeMounts: []v1.VolumeMount{
-			{Name: activateOSDVolumeName, MountPath: osdDataPath},
 			{Name: "devices", MountPath: "/dev"},
 		},
 		SecurityContext: controller.PrivilegedContext(true),
@@ -1429,5 +1423,24 @@ func getOSDCmd(cmd []string, interval int) []string {
 	if interval != 0 {
 		return append([]string{"bash", "-x", "-c", cephOSDStart, "--"}, cmd...)
 	}
+	return cmd
+}
+
+func extractDevicePath(blockPath string) string {
+	re := regexp.MustCompile(`^(.*?)(p?\d+)$`)
+	matches := re.FindStringSubmatch(blockPath)
+
+	if len(matches) > 1 {
+		return matches[1]
+	}
+
+	return blockPath
+}
+
+func getMountOSDPartitionCmd(osd OSDInfo) string {
+	src := extractDevicePath(osd.BlockPath) + "p1"
+	dest := activateOSDMountPath + strconv.Itoa(osd.ID)
+	cmd := "mkdir -p " + dest + " && mount " + src + " " + dest
+
 	return cmd
 }
