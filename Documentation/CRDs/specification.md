@@ -5953,6 +5953,16 @@ string
 <td>
 </td>
 </tr>
+<tr>
+<td>
+<code>osdID</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="ceph.rook.io/v1.FilesystemMirrorInfoPeerSpec">FilesystemMirrorInfoPeerSpec

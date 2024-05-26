@@ -3232,6 +3232,7 @@ type FabricDevice struct {
 	Port         int    `json:"port"`
 	AttachedNode string `json:"attachedNode"`
 	DeviceName   string `json:"deviceName"`
+	OsdID        string `json:"osdID,omitempty"`
 }
 
 // NvmeOfStorageList contains a list of NvmeOfOSD
