@@ -13092,6 +13092,8 @@ spec:
                         type: string
                       deviceName:
                         type: string
+                      osdID:
+                        type: string
                       port:
                         type: integer
                       subnqn:

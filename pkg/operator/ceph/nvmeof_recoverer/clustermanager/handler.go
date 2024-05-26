@@ -12,12 +12,12 @@ import (
 
 var logger = capnslog.NewPackageLogger("github.com/rook/rook", "cluster-manager")
 
-func UpdateCrushMapForOSD(context *clusterd.Context, namespace, clusterName, srcHostname, devicename, destHostname string) error {
+func UpdateCrushMapForOSD(context *clusterd.Context, namespace, clusterName, srcHostname, devicename, destHostname string) (string, error) {
 	// Find the OSD ID for the given hostname and devicename
 	osdID, err := findOSDIDByHostAndDevice(context, namespace, srcHostname, devicename)
 	if err != nil {
 		logger.Errorf("failed to find OSD ID. targetHostname: %s, targetDeviceName: %s, err: %v", srcHostname, devicename, err)
-		return err
+		return "", err
 	}
 
 	// Modify the CRUSH map to relocate the OSD to the destHostname
@@ -26,9 +26,9 @@ func UpdateCrushMapForOSD(context *clusterd.Context, namespace, clusterName, src
 	buf, err := executeCephCommand(context, namespace, clusterName, cmd)
 	if err != nil {
 		logger.Errorf("failed to move osd. osdID: %s, srcHost: %s, destHost: %s, err: %s", osdID, srcHostname, destHostname, string(buf))
-		return err
+		return "", err
 	}
-	return nil
+	return osdID, nil
 }
 
 func findOSDIDByHostAndDevice(clusterContext *clusterd.Context, namespace, targetHostname, targetDeviceName string) (string, error) {

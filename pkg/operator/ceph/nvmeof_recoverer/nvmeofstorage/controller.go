@@ -141,11 +141,11 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 }
 
 func (r *ReconcileNvmeOfStorage) Reconcile(context context.Context, request reconcile.Request) (reconcile.Result, error) {
-	reconcileResponse, err := r.reconcile(request)
+	reconcileResponse, err := r.reconcile(context, request)
 	return reconcileResponse, err
 }
 
-func (r *ReconcileNvmeOfStorage) reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileNvmeOfStorage) reconcile(context context.Context, request reconcile.Request) (reconcile.Result, error) {
 	logger.Debugf("reconciling NvmeOfStorage. Request.Namespace: %s, Request.Name: %s", request.Namespace, request.Name)
 
 	if strings.Contains(request.Name, "nvmeofstorage") {
@@ -157,13 +157,19 @@ func (r *ReconcileNvmeOfStorage) reconcile(request reconcile.Request) (reconcile
 		}
 
 		// Update the crush map with the devices in the NvmeOfStorage CR
-		for _, device := range nvmeOfStorage.Spec.Devices {
-			err := clustermanager.UpdateCrushMapForOSD(r.context, "rook-ceph", "my-cluster", device.AttachedNode, device.DeviceName, "fabric-host-"+nvmeOfStorage.Spec.Name)
+		for i := range nvmeOfStorage.Spec.Devices {
+			device := &nvmeOfStorage.Spec.Devices[i]
+			osdID, err := clustermanager.UpdateCrushMapForOSD(r.context, "rook-ceph", "my-cluster", device.AttachedNode, device.DeviceName, "fabric-host-"+nvmeOfStorage.Spec.Name)
 			if err != nil {
 				logger.Debugf("failed to update CRUSH Map. targetNode: %s, targetDevice: %s, err: %s", device.AttachedNode, device.DeviceName, err)
 				continue
 			}
+			device.OsdID = osdID
 			logger.Debugf("successfully updated CRUSH Map. targetNode: %s, targetDevice: %s", device.AttachedNode, device.DeviceName)
+		}
+		err = r.updateCR(context, request, nvmeOfStorage)
+		if err != nil {
+			return reconcile.Result{}, err
 		}
 
 		return reporting.ReportReconcileResult(logger, r.recorder, request, nvmeOfStorage, reconcile.Result{}, err)
@@ -174,6 +180,15 @@ func (r *ReconcileNvmeOfStorage) reconcile(request reconcile.Request) (reconcile
 	}
 
 	return reconcile.Result{}, nil
+}
+
+func (r *ReconcileNvmeOfStorage) updateCR(context context.Context, request reconcile.Request, nvmeOfStorage *cephv1.NvmeOfStorage) error {
+	err := r.client.Update(context, nvmeOfStorage)
+	if err != nil {
+		logger.Error(err, "Failed to update NVMeOfStorage", "Namespace", request.Namespace, "Name", request.Name)
+		return err
+	}
+	return nil
 }
 
 // fetchNvmeOfOSD retrieves the NvmeOfOSD instance by name and namespace.
