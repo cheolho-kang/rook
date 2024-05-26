@@ -31,13 +31,16 @@ import (
 	opcontroller "github.com/rook/rook/pkg/operator/ceph/controller"
 	"github.com/rook/rook/pkg/operator/ceph/nvmeof_recoverer/clustermanager"
 	"github.com/rook/rook/pkg/operator/ceph/reporting"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
@@ -101,6 +104,39 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	// Watch for changes on the OSD Pod object
+	podKind := source.Kind(
+		mgr.GetCache(),
+		&corev1.Pod{})
+	err = c.Watch(podKind, &handler.EnqueueRequestForObject{},
+		predicate.Funcs{
+			UpdateFunc: func(event event.UpdateEvent) bool {
+				oldPod, okOld := event.ObjectOld.(*corev1.Pod)
+				newPod, okNew := event.ObjectNew.(*corev1.Pod)
+				if !okOld || !okNew {
+					return false
+				}
+				if isOSDPod(newPod.Labels) && isPodDead(oldPod, newPod) {
+					namespacedName := fmt.Sprintf("%s/%s", newPod.Namespace, newPod.Name)
+					logger.Debugf("update event on Pod %q", namespacedName)
+					return true
+				}
+				return false
+			},
+			CreateFunc: func(e event.CreateEvent) bool {
+				return false
+			},
+			DeleteFunc: func(e event.DeleteEvent) bool {
+				return false
+			},
+			GenericFunc: func(e event.GenericEvent) bool {
+				return false
+			},
+		})
+	if err != nil {
+		return errors.Wrap(err, "failed to watch for changes on the Pod object")
+	}
+
 	return nil
 }
 
@@ -131,6 +167,10 @@ func (r *ReconcileNvmeOfStorage) reconcile(request reconcile.Request) (reconcile
 		}
 
 		return reporting.ReportReconcileResult(logger, r.recorder, request, nvmeOfStorage, reconcile.Result{}, err)
+	} else if strings.Contains(request.Name, "rook-ceph-osd") {
+		// TODO (cheolho.kang): Implement the reconclie logic later
+		// Prepare moving the OSD to another node
+		logger.Debugf("Pod %q is going be deleted", request.Name)
 	}
 
 	return reconcile.Result{}, nil
@@ -144,4 +184,25 @@ func (r *ReconcileNvmeOfStorage) fetchNvmeOfStorage(nvmeOfStorage *cephv1.NvmeOf
 		return err
 	}
 	return nil
+}
+
+func isOSDPod(labels map[string]string) bool {
+	if labels["app"] == "rook-ceph-osd" && labels["ceph-osd-id"] != "" {
+		logger.Debugf("OSD Pod found. ceph-osd-id: %s", labels["ceph-osd-id"])
+		return true
+	}
+
+	return false
+}
+
+func isPodDead(oldPod *corev1.Pod, newPod *corev1.Pod) bool {
+	namespacedName := fmt.Sprintf("%s/%s", newPod.Namespace, newPod.Name)
+	for _, cs := range newPod.Status.ContainerStatuses {
+		if cs.State.Waiting != nil && cs.State.Waiting.Reason == "CrashLoopBackOff" {
+			logger.Infof("OSD Pod %q is in CrashLoopBackOff, oldPod.Status.Phase: %s", namespacedName, oldPod.Status.Phase)
+			return true
+		}
+	}
+
+	return false
 }
