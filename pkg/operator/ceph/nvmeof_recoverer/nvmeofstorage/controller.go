@@ -177,8 +177,24 @@ func (r *ReconcileNvmeOfStorage) reconcile(context context.Context, request reco
 
 		return reporting.ReportReconcileResult(logger, r.recorder, request, r.nvmeOfStorage, reconcile.Result{}, err)
 	} else if strings.Contains(request.Name, "rook-ceph-osd") {
-		// TODO (cheolho.kang): Implement the reconclie logic later
-		// Prepare moving the OSD to another node
+		osdId, err := extractOSDID(request.Name)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+		var nextHostName string
+		for _, device := range r.nvmeOfStorage.Spec.Devices {
+			if device.OsdID == osdId {
+				nextHostName = r.clustermanager.GetNextAttachableHost(device.AttachedNode)
+				if nextHostName == "" {
+					logger.Debugf("no attachable hosts found")
+					return reconcile.Result{}, nil
+				}
+				logger.Debugf("next host found: %s", nextHostName)
+				// TODO: Add create and run job for nvme-of device switch to the next host
+				// Placeholder for the job creation and execution
+				break
+			}
+		}
 		logger.Debugf("Pod %q is going be deleted", request.Name)
 	}
 
@@ -223,4 +239,14 @@ func isPodDead(oldPod *corev1.Pod, newPod *corev1.Pod) bool {
 	}
 
 	return false
+}
+
+func extractOSDID(podName string) (string, error) {
+	parts := strings.Split(podName, "-")
+	if len(parts) < 3 {
+		return "", fmt.Errorf("invalid pod name format")
+	}
+
+	osdID := parts[3]
+	return osdID, nil
 }

@@ -13,12 +13,18 @@ import (
 var logger = capnslog.NewPackageLogger("github.com/rook/rook", "cluster-manager")
 
 type ClusterManager struct {
-	context *clusterd.Context
+	context         *clusterd.Context
+	OSDHostMap      map[string][]string
+	AttachableHosts []string
+	HostExists      map[string]bool
 }
 
 func New(context *clusterd.Context) *ClusterManager {
 	return &ClusterManager{
-		context: context,
+		context:         context,
+		OSDHostMap:      make(map[string][]string),
+		HostExists:      make(map[string]bool),
+		AttachableHosts: []string{},
 	}
 }
 
@@ -44,6 +50,11 @@ func (cm *ClusterManager) UpdateCrushMapForOSD(namespace, clusterName, srcHostna
 	if err != nil {
 		logger.Errorf("failed to move osd. osdID: %s, srcHost: %s, destHost: %s, err: %s", osdID, srcHostname, destHostname, string(buf))
 		return "", err
+	}
+	cm.OSDHostMap[osdID] = append(cm.OSDHostMap[osdID], destHostname)
+	if !cm.HostExists[srcHostname] {
+		cm.AttachableHosts = append(cm.AttachableHosts, srcHostname)
+		cm.HostExists[srcHostname] = true
 	}
 	return osdID, nil
 }
@@ -88,4 +99,16 @@ func (cm *ClusterManager) executeCephCommand(namespace, clusterName string, cmd 
 		return nil, err
 	}
 	return buf, nil
+}
+
+func (cm *ClusterManager) GetNextAttachableHost(currentHost string) string {
+	if len(cm.AttachableHosts) == 0 {
+		return ""
+	}
+	for i, host := range cm.AttachableHosts {
+		if host == currentHost {
+			return cm.AttachableHosts[(i+1)%len(cm.AttachableHosts)]
+		}
+	}
+	return ""
 }
