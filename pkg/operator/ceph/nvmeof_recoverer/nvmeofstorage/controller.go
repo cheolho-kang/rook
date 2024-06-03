@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"emperror.dev/errors"
@@ -86,7 +87,7 @@ func newReconciler(mgr manager.Manager, context *clusterd.Context, opManagerCont
 		scheme:           mgr.GetScheme(),
 		opManagerContext: opManagerContext,
 		recorder:         mgr.GetEventRecorderFor("rook-" + controllerName),
-		clustermanager:   cm.New(context),
+		clustermanager:   cm.New(context, opManagerContext),
 		nvmeOfStorage:    &cephv1.NvmeOfStorage{},
 	}
 }
@@ -181,7 +182,9 @@ func (r *ReconcileNvmeOfStorage) reconcile(context context.Context, request reco
 		if err != nil {
 			return reconcile.Result{}, err
 		}
+
 		var nextHostName string
+		var targetOSDInfo cephv1.FabricDevice
 		for _, device := range r.nvmeOfStorage.Spec.Devices {
 			if device.OsdID == osdId {
 				nextHostName = r.clustermanager.GetNextAttachableHost(device.AttachedNode)
@@ -189,13 +192,22 @@ func (r *ReconcileNvmeOfStorage) reconcile(context context.Context, request reco
 					logger.Debugf("no attachable hosts found")
 					return reconcile.Result{}, nil
 				}
-				logger.Debugf("next host found: %s", nextHostName)
-				// TODO: Add create and run job for nvme-of device switch to the next host
-				// Placeholder for the job creation and execution
+				targetOSDInfo = device
 				break
 			}
 		}
-		logger.Debugf("Pod %q is going be deleted", request.Name)
+
+		// Connect the device to the next host for fast recovery
+		var newDevice string
+		newDevice, err = r.clustermanager.StartNvmeoFConnectJob(cm.NvmeofConnect, nextHostName,
+			r.nvmeOfStorage.Spec.IP, strconv.Itoa(targetOSDInfo.Port), targetOSDInfo.SubNQN)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+		logger.Debugf("successfully connected device to new host. targetHost: %s newDevice: %s", nextHostName, newDevice)
+
+		// TODO: Add code to request the operator to transfer the OSD
+		// Placeholder code to update the CR and configmap for transfering the OSD
 	}
 
 	return reconcile.Result{}, nil
