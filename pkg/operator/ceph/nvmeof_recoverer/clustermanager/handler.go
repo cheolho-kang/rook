@@ -12,9 +12,19 @@ import (
 
 var logger = capnslog.NewPackageLogger("github.com/rook/rook", "cluster-manager")
 
-func UpdateCrushMapForOSD(context *clusterd.Context, namespace, clusterName, srcHostname, devicename, destHostname string) (string, error) {
+type ClusterManager struct {
+	context *clusterd.Context
+}
+
+func New(context *clusterd.Context) *ClusterManager {
+	return &ClusterManager{
+		context: context,
+	}
+}
+
+func (cm *ClusterManager) UpdateCrushMapForOSD(namespace, clusterName, srcHostname, devicename, destHostname string) (string, error) {
 	// Find the OSD ID for the given hostname and devicename
-	osdID, err := findOSDIDByHostAndDevice(context, namespace, srcHostname, devicename)
+	osdID, err := cm.findOSDIDByHostAndDevice(namespace, srcHostname, devicename)
 	if err != nil {
 		logger.Errorf("failed to find OSD ID. targetHostname: %s, targetDeviceName: %s, err: %v", srcHostname, devicename, err)
 		return "", err
@@ -30,7 +40,7 @@ func UpdateCrushMapForOSD(context *clusterd.Context, namespace, clusterName, src
 		"root=default",
 		fmt.Sprintf("host=%s", destHostname),
 	}
-	buf, err := executeCephCommand(context, namespace, clusterName, cmd)
+	buf, err := cm.executeCephCommand(namespace, clusterName, cmd)
 	if err != nil {
 		logger.Errorf("failed to move osd. osdID: %s, srcHost: %s, destHost: %s, err: %s", osdID, srcHostname, destHostname, string(buf))
 		return "", err
@@ -38,9 +48,9 @@ func UpdateCrushMapForOSD(context *clusterd.Context, namespace, clusterName, src
 	return osdID, nil
 }
 
-func findOSDIDByHostAndDevice(clusterContext *clusterd.Context, namespace, targetHostname, targetDeviceName string) (string, error) {
+func (cm *ClusterManager) findOSDIDByHostAndDevice(namespace, targetHostname, targetDeviceName string) (string, error) {
 	// Retrieve the complete list of OSD pods
-	pods, err := clusterContext.Clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{
+	pods, err := cm.context.Clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{
 		LabelSelector: "app=rook-ceph-osd",
 	})
 	if err != nil {
@@ -66,10 +76,10 @@ func findOSDIDByHostAndDevice(clusterContext *clusterd.Context, namespace, targe
 	return "", fmt.Errorf("no matching OSD found. targetHostname: %s, targetDevicename: %s", targetHostname, targetDeviceName)
 }
 
-func executeCephCommand(clusterContext *clusterd.Context, namespace, clusterName string, cmd []string) ([]byte, error) {
+func (cm *ClusterManager) executeCephCommand(namespace, clusterName string, cmd []string) ([]byte, error) {
 	ctx := context.TODO()
 	clusterInfo := cephclient.AdminClusterInfo(ctx, namespace, clusterName)
-	exec := cephclient.NewCephCommand(clusterContext, clusterInfo, cmd)
+	exec := cephclient.NewCephCommand(cm.context, clusterInfo, cmd)
 	exec.JsonOutput = true
 	buf, err := exec.Run()
 	if err != nil {

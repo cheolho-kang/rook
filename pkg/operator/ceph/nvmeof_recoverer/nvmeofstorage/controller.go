@@ -29,7 +29,7 @@ import (
 	cephv1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1"
 	"github.com/rook/rook/pkg/clusterd"
 	opcontroller "github.com/rook/rook/pkg/operator/ceph/controller"
-	"github.com/rook/rook/pkg/operator/ceph/nvmeof_recoverer/clustermanager"
+	cm "github.com/rook/rook/pkg/operator/ceph/nvmeof_recoverer/clustermanager"
 	"github.com/rook/rook/pkg/operator/ceph/reporting"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -68,6 +68,8 @@ type ReconcileNvmeOfStorage struct {
 	context          *clusterd.Context
 	opManagerContext context.Context
 	recorder         record.EventRecorder
+	clustermanager   *cm.ClusterManager
+	nvmeOfStorage    *cephv1.NvmeOfStorage
 }
 
 // Add creates a new NvmeOfStorage Controller and adds it to the Manager. The Manager will set fields on the Controller
@@ -84,6 +86,8 @@ func newReconciler(mgr manager.Manager, context *clusterd.Context, opManagerCont
 		scheme:           mgr.GetScheme(),
 		opManagerContext: opManagerContext,
 		recorder:         mgr.GetEventRecorderFor("rook-" + controllerName),
+		clustermanager:   cm.New(context),
+		nvmeOfStorage:    &cephv1.NvmeOfStorage{},
 	}
 }
 
@@ -150,16 +154,15 @@ func (r *ReconcileNvmeOfStorage) reconcile(context context.Context, request reco
 
 	if strings.Contains(request.Name, "nvmeofstorage") {
 		// Fetch the NvmeOfStorage CRD object
-		nvmeOfStorage := &cephv1.NvmeOfStorage{}
-		err := r.fetchNvmeOfStorage(nvmeOfStorage, request)
+		err := r.fetchNvmeOfStorage(r.nvmeOfStorage, request)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
 
 		// Update the crush map with the devices in the NvmeOfStorage CR
-		for i := range nvmeOfStorage.Spec.Devices {
-			device := &nvmeOfStorage.Spec.Devices[i]
-			osdID, err := clustermanager.UpdateCrushMapForOSD(r.context, "rook-ceph", "my-cluster", device.AttachedNode, device.DeviceName, "fabric-host-"+nvmeOfStorage.Spec.Name)
+		for i := range r.nvmeOfStorage.Spec.Devices {
+			device := &r.nvmeOfStorage.Spec.Devices[i]
+			osdID, err := r.clustermanager.UpdateCrushMapForOSD("rook-ceph", "my-cluster", device.AttachedNode, device.DeviceName, "fabric-host-"+r.nvmeOfStorage.Spec.Name)
 			if err != nil {
 				logger.Debugf("failed to update CRUSH Map. targetNode: %s, targetDevice: %s, err: %s", device.AttachedNode, device.DeviceName, err)
 				continue
@@ -167,12 +170,12 @@ func (r *ReconcileNvmeOfStorage) reconcile(context context.Context, request reco
 			device.OsdID = osdID
 			logger.Debugf("successfully updated CRUSH Map. targetNode: %s, targetDevice: %s", device.AttachedNode, device.DeviceName)
 		}
-		err = r.updateCR(context, request, nvmeOfStorage)
+		err = r.updateCR(context, request, r.nvmeOfStorage)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
 
-		return reporting.ReportReconcileResult(logger, r.recorder, request, nvmeOfStorage, reconcile.Result{}, err)
+		return reporting.ReportReconcileResult(logger, r.recorder, request, r.nvmeOfStorage, reconcile.Result{}, err)
 	} else if strings.Contains(request.Name, "rook-ceph-osd") {
 		// TODO (cheolho.kang): Implement the reconclie logic later
 		// Prepare moving the OSD to another node
