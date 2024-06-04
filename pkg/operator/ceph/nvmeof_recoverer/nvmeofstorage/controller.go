@@ -19,6 +19,7 @@ package nvmeofstorage
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -29,11 +30,13 @@ import (
 
 	cephv1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1"
 	"github.com/rook/rook/pkg/clusterd"
+	"github.com/rook/rook/pkg/operator/ceph/cluster/osd"
 	opcontroller "github.com/rook/rook/pkg/operator/ceph/controller"
 	cm "github.com/rook/rook/pkg/operator/ceph/nvmeof_recoverer/clustermanager"
 	"github.com/rook/rook/pkg/operator/ceph/reporting"
 	"github.com/rook/rook/pkg/operator/k8sutil"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
@@ -226,11 +229,42 @@ func (r *ReconcileNvmeOfStorage) reconcile(context context.Context, request reco
 		}
 		logger.Debugf("successfully connected device to new host. targetHost: %s newDevice: %s", nextHostName, newDevice)
 
+		// Request the OSD to be transferred to the next host
+		r.createOSDTransferConfig(osdId, r.nvmeOfStorage.Name, nextHostName, request.Namespace)
 		// TODO: Add code to request the operator to transfer the OSD
-		// Placeholder code to update the CR and configmap for transfering the OSD
+		// Placeholder code to update the CR for transfering the OSD
 	}
 
 	return reconcile.Result{}, nil
+}
+
+func (r *ReconcileNvmeOfStorage) createOSDTransferConfig(osdId, faultDomain, nextHostName, namespace string) {
+	var osdTransferInfo osd.OSDTransferInfo
+	osdTransferInfo.ID, _ = strconv.Atoi(osdId)
+	osdTransferInfo.Node = nextHostName
+	osdTransferInfo.FaultDomain = faultDomain
+	configInBytes, err := json.Marshal(osdTransferInfo)
+	if err != nil {
+		logger.Errorf("failed to marshal osd replace config. osdID: %s, nextHostName: %s, faultDomain: %s", osdId, faultDomain, nextHostName)
+		return
+	}
+
+	newConfigMap := &v1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      osd.OSDTransferConfigName,
+			Namespace: namespace,
+		},
+		Data: map[string]string{
+			osd.OSDTransferConfigKey: string(configInBytes),
+		},
+	}
+
+	_, err = k8sutil.CreateOrUpdateConfigMap(r.opManagerContext, r.context.Clientset, newConfigMap)
+	if err != nil {
+		logger.Errorf("failed to create or update %q configMap", newConfigMap.Name)
+		return
+	}
+	logger.Debug("successfully created or updated configMap, name: ", newConfigMap.Name, ", osdTransferInfo: ", osdTransferInfo)
 }
 
 func (r *ReconcileNvmeOfStorage) updateCR(context context.Context, request reconcile.Request, nvmeOfStorage *cephv1.NvmeOfStorage) error {
