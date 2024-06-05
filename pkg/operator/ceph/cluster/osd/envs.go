@@ -50,6 +50,8 @@ const (
 	CrushInitialWeightVarName           = "ROOK_OSD_CRUSH_INITIAL_WEIGHT"
 	OSDStoreTypeVarName                 = "ROOK_OSD_STORE_TYPE"
 	ReplaceOSDIDVarName                 = "ROOK_REPLACE_OSD"
+	TransferOSDIDVarName                = "ROOK_TRANSFER_OSD"
+	NvmeofFaultDomainVarName            = "ROOK_NVMEOF_FAULT_DOMAIN"
 	CrushRootVarName                    = "ROOK_CRUSHMAP_ROOT"
 	tcmallocMaxTotalThreadCacheBytesEnv = "TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES"
 )
@@ -174,6 +176,14 @@ func crushDeviceClassEnvVar(crushDeviceClass string) v1.EnvVar {
 
 func osdStoreTypeEnvVar(storeType string) v1.EnvVar {
 	return v1.EnvVar{Name: OSDStoreTypeVarName, Value: storeType}
+}
+
+func transferOSDIDEnvVar(id string) v1.EnvVar {
+	return v1.EnvVar{Name: TransferOSDIDVarName, Value: id}
+}
+
+func nvmeofFaultDomainEnvVar(host string) v1.EnvVar {
+	return v1.EnvVar{Name: NvmeofFaultDomainVarName, Value: host}
 }
 
 func replaceOSDIDEnvVar(id string) v1.EnvVar {

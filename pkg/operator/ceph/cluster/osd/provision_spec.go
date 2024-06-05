@@ -305,6 +305,22 @@ func (c *Cluster) provisionOSDContainer(osdProps osdProperties, copyBinariesMoun
 	}
 
 	// Add OSD ID as environment variables.
+	// When this env is set, prepare pod job will transfer a OSD with this ID on the target node
+	if c.transferOSD != nil {
+		if !osdProps.onPVC() {
+			if c.transferOSD.Node == osdProps.crushHostname {
+				envVars = append(
+					envVars,
+					transferOSDIDEnvVar(fmt.Sprint(c.transferOSD.ID)),
+				)
+				envVars = append(
+					envVars,
+					nvmeofFaultDomainEnvVar(fmt.Sprint(c.transferOSD.FaultDomain)),
+				)
+			}
+		}
+	}
+
 	// When this env is set, prepare pod job will destroy this OSD.
 	if c.replaceOSD != nil {
 		// Compare pvc claim name in case of OSDs on PVC

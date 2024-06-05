@@ -68,6 +68,8 @@ var (
 	clusterName             string
 	osdID                   int
 	replaceOSDID            int
+	transferOSDID           int
+	nvmeOfFaultDomain       string
 	osdStoreType            string
 	osdStringID             string
 	osdUUID                 string
@@ -91,6 +93,8 @@ func addOSDFlags(command *cobra.Command) {
 
 	// flags specific to provisioning
 	provisionCmd.Flags().IntVar(&replaceOSDID, "replace-osd", -1, "osd to be destroyed")
+	provisionCmd.Flags().IntVar(&transferOSDID, "transfer-osd", -1, "osd to re-use for a new osd")
+	provisionCmd.Flags().StringVar(&nvmeOfFaultDomain, "nvmeof-fault-domain", "", "NVMe-oF fault domain where the OSD to be transferred is located")
 	provisionCmd.Flags().StringVar(&cfg.devices, "data-devices", "", "comma separated list of devices to use for storage")
 	provisionCmd.Flags().StringVar(&osdDataDeviceFilter, "data-device-filter", "", "a regex filter for the device names to use, or \"all\"")
 	provisionCmd.Flags().StringVar(&osdDataDevicePathFilter, "data-device-path-filter", "", "a regex filter for the device path names to use")
