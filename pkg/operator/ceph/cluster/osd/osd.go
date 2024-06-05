@@ -85,6 +85,7 @@ type Cluster struct {
 	kv           *k8sutil.ConfigMapKVStore
 	deviceSets   []deviceSet
 	replaceOSD   *OSDReplaceInfo
+	transferOSD  *OSDTransferInfo
 }
 
 // New creates an instance of the OSD manager
@@ -219,6 +220,15 @@ func (c *Cluster) Start() error {
 	err := c.replaceOSDForNewStore()
 	if err != nil {
 		return errors.Wrapf(err, "failed to replace an OSD that needs migration to new backend store in namespace %q", namespace)
+	}
+
+	// identify OSDs within the fabric fault domain that need to be transferred to a new node
+	err = c.checkNeedToTransferOSD()
+	if err != nil {
+		return errors.Wrapf(
+			err, "failed to check if any OSDs need to be transferred to a new node in namespace %q",
+			namespace,
+		)
 	}
 
 	osdsToSkipReconcile, err := controller.GetDaemonsToSkipReconcile(c.clusterInfo.Context, c.context, c.clusterInfo.Namespace, OsdIdLabelKey, AppName)
@@ -940,6 +950,34 @@ func (c *Cluster) getOSDStoreStatus() (*cephv1.OSDStatus, error) {
 	return &cephv1.OSDStatus{
 		StoreType: storeType,
 	}, nil
+}
+
+// checkNeedToTransferOSD checks config map if there is an OSD using fabric failure domain that needs to be transferred to a new host
+func (c *Cluster) checkNeedToTransferOSD() error {
+	osdToTransfer, err := c.getOSDTransferInfo()
+	if err != nil {
+		panic(err)
+	}
+
+	if osdToTransfer == nil {
+		return nil
+	}
+
+	delOpts := &k8sutil.DeleteOptions{
+		MustDelete:  true,
+		WaitOptions: k8sutil.WaitOptions{Wait: true},
+	}
+	err = k8sutil.DeleteConfigMap(c.clusterInfo.Context, c.context.Clientset,
+		OSDTransferConfigName, c.clusterInfo.Namespace, delOpts,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	c.transferOSD = osdToTransfer
+	logger.Infof("starting transfer of the OSD.%d", c.transferOSD.ID)
+
+	return nil
 }
 
 func getOSDLocationFromArgs(args []string) (string, bool) {

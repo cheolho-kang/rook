@@ -17,6 +17,14 @@ limitations under the License.
 // Package osd for the Ceph OSDs.
 package osd
 
+import (
+	"encoding/json"
+
+	"github.com/pkg/errors"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
 const (
 	OSDTransferConfigName = "osd-transfer-config"
 	OSDTransferConfigKey  = "config"
@@ -26,4 +34,30 @@ type OSDTransferInfo struct {
 	ID          int    `json:"id"`
 	Node        string `json:"node"`
 	FaultDomain string `json:"faultDomain"`
+}
+
+// getOSDTransferInfo returns an existing OSD info that needs to be transfered to a new node
+func (c *Cluster) getOSDTransferInfo() (*OSDTransferInfo, error) {
+	cm, err := c.context.Clientset.CoreV1().ConfigMaps(c.clusterInfo.Namespace).Get(
+		c.clusterInfo.Context, OSDTransferConfigName, metav1.GetOptions{})
+	if err != nil {
+		if kerrors.IsNotFound(err) {
+			return nil, nil
+		}
+	}
+
+	configStr, ok := cm.Data[OSDTransferConfigKey]
+	if !ok || configStr == "" {
+		logger.Debugf("empty config map %q", OSDTransferConfigName)
+		return nil, nil
+	}
+
+	config := &OSDTransferInfo{}
+	err = json.Unmarshal([]byte(configStr), config)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "failed to JSON unmarshal osd replace status from the (%q)", configStr)
+	}
+
+	return config, nil
 }
