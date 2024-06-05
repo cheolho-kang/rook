@@ -227,6 +227,11 @@ func Provision(context *clusterd.Context, agent *OsdAgent, crushLocation, topolo
 		return errors.Wrap(err, "failed to configure devices")
 	}
 
+	// FilterOutUnlistedDevices filters out the devices that are not listed in the desired devices
+	// This can happen when the device is not listed in the desired devices
+	// but it's still configured by ceph-volume
+	deviceOSDs = FilterOutUndesiredDevices(deviceOSDs, agent.devices)
+
 	// Let's fail if no OSDs were configured
 	// This likely means the filter for available devices passed (in PVC case)
 	// but the resulting device was already configured for another cluster (disk not wiped and leftover)
@@ -640,4 +645,29 @@ func GetOSDInfoById(context *clusterd.Context, clusterInfo *client.ClusterInfo, 
 	}
 
 	return nil, fmt.Errorf("failed to get details for OSD %d using ceph-volume list", osdID)
+}
+
+// FilterOutUnlistedDevices filters out the devices that are not listed in the desired devices
+// If the desired devices are not specified, all devices are returned
+// Desired devices for filtering sould be specified as a list of device paths (e.g., /dev/nvme0n1)
+func FilterOutUndesiredDevices(deviceOSDs []oposd.OSDInfo, desiredDevices []DesiredDevice) []oposd.OSDInfo {
+	if len(desiredDevices) > 0 {
+		desiredMap := make(map[string]bool)
+		for _, d := range desiredDevices {
+			if !d.IsFilter && !d.IsDevicePathFilter {
+				desiredMap[d.Name] = true
+			}
+		}
+		if len(desiredMap) > 0 {
+			var filteredOSDs []oposd.OSDInfo
+			for _, device := range deviceOSDs {
+				if _, ok := desiredMap[device.BlockPath]; ok {
+					logger.Infof("device %q is selected by the cephCluster lists", device.BlockPath)
+					filteredOSDs = append(filteredOSDs, device)
+				}
+			}
+			return filteredOSDs
+		}
+	}
+	return deviceOSDs
 }
