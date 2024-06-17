@@ -231,9 +231,12 @@ func (r *ReconcileNvmeOfStorage) reconcile(context context.Context, request reco
 
 		// Request the OSD to be transferred to the next host
 		r.createOSDTransferConfig(osdId, r.nvmeOfStorage.Name, nextHostName, request.Namespace)
-		// TODO: Add code to request the operator to transfer the OSD
-		// Placeholder code to update the CR for transfering the OSD
-	}
+		err = r.updateCephClusterDevices(
+			request.Namespace, r.nvmeOfStorage.Spec.ClusterName,
+			targetOSDInfo.DeviceName, targetOSDInfo.AttachedNode, newDevice, nextHostName)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
 
 	return reconcile.Result{}, nil
 }
@@ -283,6 +286,48 @@ func (r *ReconcileNvmeOfStorage) fetchNvmeOfStorage(nvmeOfStorage *cephv1.NvmeOf
 		logger.Errorf("unable to fetch NvmeOfStorage, err: %v", err)
 		return err
 	}
+	return nil
+}
+
+func (r *ReconcileNvmeOfStorage) updateCephClusterDevices(namespace, clusterName, oldDevicePath, oldNode, newDevicePath, newNode string) error {
+	cephCluster, err := r.context.RookClientset.CephV1().CephClusters(namespace).Get(context.Background(), clusterName, metav1.GetOptions{})
+	if err != nil {
+		logger.Errorf("failed to get cluster CR. err: %v", err)
+		return err
+	}
+
+	// Update the devices in the CephCluster CR
+	for i, node := range cephCluster.Spec.Storage.Nodes {
+		if node.Name == oldNode {
+			var updatedDevices []cephv1.Device
+			for _, device := range node.Devices {
+				if device.Name != oldDevicePath {
+					updatedDevices = append(updatedDevices, device)
+				}
+			}
+			cephCluster.Spec.Storage.Nodes[i].Devices = updatedDevices
+		}
+	}
+
+	for i, node := range cephCluster.Spec.Storage.Nodes {
+		if node.Name == newNode {
+			newDevice := cephv1.Device{Name: newDevicePath}
+			for _, device := range node.Devices {
+				if device.Name == newDevicePath {
+					panic(fmt.Sprintf("device %s already exists in the new host", newDevicePath))
+				}
+			}
+			cephCluster.Spec.Storage.Nodes[i].Devices = append(node.Devices, newDevice)
+			break
+		}
+	}
+
+	_, err = r.context.RookClientset.CephV1().CephClusters(namespace).Update(context.TODO(), cephCluster, metav1.UpdateOptions{})
+	if err != nil {
+		return err
+	}
+	logger.Debug("CephCluster updated successfully. oldDevicePath: ", oldDevicePath, ", oldNode: ", oldNode, ", newDevicePath: ", newDevicePath, ", newNode: ", newNode)
+
 	return nil
 }
 

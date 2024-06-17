@@ -13098,6 +13098,8 @@ spec:
               type: object
             spec:
               properties:
+                clusterName:
+                  type: string
                 devices:
                   items:
                     description: FabricDevice represents a fabric device connected to a node
@@ -13124,6 +13126,7 @@ spec:
                 name:
                   type: string
               required:
+                - clusterName
                 - devices
                 - ip
                 - name

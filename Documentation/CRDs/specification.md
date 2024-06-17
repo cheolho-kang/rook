@@ -2565,6 +2565,16 @@ string
 </tr>
 <tr>
 <td>
+<code>clusterName</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
 <code>devices</code><br/>
 <em>
 <a href="#ceph.rook.io/v1.FabricDevice">
@@ -9058,6 +9068,16 @@ string
 <tr>
 <td>
 <code>ip</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>clusterName</code><br/>
 <em>
 string
 </em>

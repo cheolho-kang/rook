@@ -3216,9 +3216,10 @@ type NvmeOfStorage struct {
 }
 
 type NvmeOfStorageSpec struct {
-	Name    string         `json:"name"`
-	IP      string         `json:"ip"`
-	Devices []FabricDevice `json:"devices"`
+	Name        string         `json:"name"`
+	IP          string         `json:"ip"`
+	ClusterName string         `json:"clusterName"`
+	Devices     []FabricDevice `json:"devices"`
 }
 
 // NvmeOfStorageStatus defines the observed state of NvmeOStorage
