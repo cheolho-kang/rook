@@ -161,7 +161,8 @@ func configRawDevice(name string, context *clusterd.Context) (*sys.LocalDisk, er
 }
 
 // Provision provisions an OSD
-func Provision(context *clusterd.Context, agent *OsdAgent, crushLocation, topologyAffinity, deviceFilter, metaDevice string) error {
+// TODO(cheolho.kang): Remove argument `nvmeOfFaultDomain` and `transferOSDID` later. Need to find better way to implement this by adding the codes to right place.
+func Provision(context *clusterd.Context, agent *OsdAgent, crushLocation, topologyAffinity, deviceFilter, metaDevice, nvmeOfFaultDomain string, transferOSDID int) error {
 	if agent.pvcBacked && os.Getenv(oposd.EncryptedDeviceEnvVarName) == "true" {
 		logger.Debug("encryption configuration detecting, populating kek to an env variable")
 		// Init KMS store, retrieve the KEK and store it as an env var for ceph-volume
@@ -239,8 +240,21 @@ func Provision(context *clusterd.Context, agent *OsdAgent, crushLocation, topolo
 
 	// Populate CRUSH location for each OSD on the host
 	for i := range deviceOSDs {
-		deviceOSDs[i].Location = crushLocation
-		deviceOSDs[i].TopologyAffinity = topologyAffinity
+		// If we are transferring an OSD, we need to modify the host to the fabric failure domain
+		// This is because the OSD doesn't need to recover cause this device is not failed
+		if transferOSDID != -1 && deviceOSDs[i].ID == transferOSDID {
+			root := strings.Split(crushLocation, " ")[0]
+			locArgs := []string{root, fmt.Sprintf("host=%s", nvmeOfFaultDomain)}
+			fabricHost := strings.Join(locArgs, " ")
+			deviceOSDs[i].Location = fabricHost
+			logger.Infof(
+				"OSD.%d is marked for transfer, modifying the CRUSH host to the \"%s\"",
+				transferOSDID, fabricHost,
+			)
+		} else {
+			deviceOSDs[i].Location = crushLocation
+			deviceOSDs[i].TopologyAffinity = topologyAffinity
+		}
 	}
 
 	logger.Infof("devices = %+v", deviceOSDs)

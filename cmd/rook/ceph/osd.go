@@ -281,7 +281,7 @@ func prepareOSD(cmd *cobra.Command, args []string) error {
 		metaDevice = cfg.metadataDevice
 	}
 
-	err = osddaemon.Provision(context, agent, crushLocation, topologyAffinity, deviceFilter, metaDevice)
+	err = osddaemon.Provision(context, agent, crushLocation, topologyAffinity, deviceFilter, metaDevice, nvmeOfFaultDomain, transferOSDID)
 	if err != nil {
 		// something failed in the OSD orchestration, update the status map with failure details
 		status := oposd.OrchestrationStatus{
