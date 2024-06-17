@@ -32,6 +32,7 @@ import (
 	opcontroller "github.com/rook/rook/pkg/operator/ceph/controller"
 	cm "github.com/rook/rook/pkg/operator/ceph/nvmeof_recoverer/clustermanager"
 	"github.com/rook/rook/pkg/operator/ceph/reporting"
+	"github.com/rook/rook/pkg/operator/k8sutil"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -195,6 +196,25 @@ func (r *ReconcileNvmeOfStorage) reconcile(context context.Context, request reco
 				targetOSDInfo = device
 				break
 			}
+		}
+
+		// Delete the OSD deployment that is in CrashLoopBackOff
+		err = k8sutil.DeleteDeployment(
+			r.opManagerContext,
+			r.context.Clientset,
+			request.Namespace,
+			"rook-ceph-osd-"+osdId,
+		)
+		if err != nil {
+			panic(err)
+		}
+		logger.Debugf("successfully deleted the OSD.%s deployment", osdId)
+
+		// Disconnect the fabric device used by the OSD
+		_, err = r.clustermanager.StartNvmeoFConnectJob(cm.NvmeofDisconnect, nextHostName,
+			r.nvmeOfStorage.Spec.IP, strconv.Itoa(targetOSDInfo.Port), targetOSDInfo.SubNQN)
+		if err != nil {
+			return reconcile.Result{}, err
 		}
 
 		// Connect the device to the next host for fast recovery
