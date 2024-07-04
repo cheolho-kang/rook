@@ -1,0 +1,63 @@
+#################################################################################################################
+# Define the settings for the rook-ceph cluster with common settings for a small test cluster.
+# All nodes with available raw devices will be used for the Ceph cluster. One node is sufficient
+# in this example.
+
+# For example, to create the cluster:
+#   kubectl create -f crds.yaml -f common.yaml -f operator.yaml
+#   kubectl create -f cluster-test.yaml
+#################################################################################################################
+apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  name: nvmeof-recoverer
+  namespace: nvmeof-recoverer
+spec:
+  cephVersion:
+    image: quay.io/ceph/daemon-base:latest-reef-devel
+    allowUnsupported: true
+  mgr:
+    allowMultiplePerNode: true
+    count: 1
+  mon:
+    allowMultiplePerNode: true
+    count: 1
+  dashboard:
+    enabled: true
+  storage:
+    backfillFullRatio: 0.91
+    flappingRestartIntervalHours: 0
+    fullRatio: 0.96
+    nearFullRatio: 0.88
+    useAllNodes: false
+    useAllDevices: false
+    # store:
+    #   type: bluestore
+    #   updateStore: yes-really-update-store
+    nodes:
+      - name: "qemu1"
+        devices:
+          - name: /dev/nvme2n1
+            config:
+              failureDomain: fabric-host-pbssd1
+      - name: "qemu2"
+        devices:
+          - name: "/dev/nvme3n1"
+  healthCheck:
+    daemonHealth:
+      mon:
+        interval: 40s
+        timeout: 600s
+  priorityClassNames:
+    mgr: system-cluster-critical
+    mon: system-node-critical
+    osd: system-node-critical
+  disruptionManagement:
+    managePodBudgets: true
+  cephConfig:
+    global:
+      osd_pool_default_size: "1"
+      mon_warn_on_pool_no_redundancy: "false"
+      bdev_flock_retry: "20"
+      bluefs_buffered_io: "false"
+      mon_data_avail_warn: "10"

@@ -1642,3 +1642,22 @@ func (k8sh *K8sHelper) WaitUntilResourceIsDeleted(kind, namespace, name string) 
 	}
 	return errors.Wrapf(err, "timed out waiting for resource %s %q to be deleted:\n%s", kind, name, out)
 }
+
+func (k8sh *K8sHelper) InjectFaultToPod(namespace, podName string) error {
+	ctx := context.TODO()
+	deploymentRef, err := k8sutil.GetDeploymentOwnerReference(ctx, k8sh.Clientset, podName, namespace)
+	if err != nil {
+		logger.Fatalf("Error retrieving deployment owner reference: %s", err)
+	}
+	// if err := k8sutil.DeleteReplicaSet(ctx, k8sh.Clientset, namespace, deploymentRef.Name); err != nil {
+	// 	logger.Fatalf("Error deleting replicaset: %s", err)
+	// }
+
+	_, err = k8sh.Kubectl("-n", namespace, "patch", "deployment", deploymentRef.Name, "--type=json", "-p=[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/command\", \"value\":[\"exit\",\"1\"]}]")
+	if err != nil {
+		return fmt.Errorf("failed to inject fault. %+v", err)
+	}
+
+	logger.Infof("Successfully injected fault to pod %s in namespace %s", podName, namespace)
+	return nil
+}

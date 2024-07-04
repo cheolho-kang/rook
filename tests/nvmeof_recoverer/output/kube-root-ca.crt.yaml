@@ -1,0 +1,25 @@
+apiVersion: v1
+data:
+  ca.crt: |
+    -----BEGIN CERTIFICATE-----
+    MIIBejCCAR+gAwIBAgIBADAKBggqhkjOPQQDAjAkMSIwIAYDVQQDDBlya2UyLXNl
+    cnZlci1jYUAxNzE2ODczNTI5MB4XDTI0MDUyODA1MTg0OVoXDTM0MDUyNjA1MTg0
+    OVowJDEiMCAGA1UEAwwZcmtlMi1zZXJ2ZXItY2FAMTcxNjg3MzUyOTBZMBMGByqG
+    SM49AgEGCCqGSM49AwEHA0IABL0LqCNClv0l4CR/eNjv1hJxQmq5SnxFaxAP0oAo
+    RrFolJOZEGYoYFpFkPsZMmB3cCzl5OPc3z2gFi/HSzZxu8WjQjBAMA4GA1UdDwEB
+    /wQEAwICpDAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBT5Q0skUS+9v5o61Kz4
+    VQ8HiB9AQDAKBggqhkjOPQQDAgNJADBGAiEAxWVEaLwnhAY9LydVouuyBZO2vpRN
+    uGNAQJZG15+efF4CIQD1Eqb7KLjxZ4Ch55lS2sA4hJBqdh1ht0DS2KSt6hgyog==
+    -----END CERTIFICATE-----
+kind: ConfigMap
+metadata:
+  annotations:
+    kubernetes.io/description: Contains a CA bundle that can be used to verify the
+      kube-apiserver when using internal endpoints such as the internal service IP
+      or kubernetes.default.svc. No other usage is guaranteed across distributions
+      of Kubernetes clusters.
+  creationTimestamp: "2024-06-04T05:31:56Z"
+  name: kube-root-ca.crt
+  namespace: rook-ceph
+  resourceVersion: "7389"
+  uid: a31b5c63-cb39-4fd9-b415-b5c3d6a93d7a

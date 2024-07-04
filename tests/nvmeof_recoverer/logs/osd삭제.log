@@ -1,0 +1,332 @@
+2024-05-28 08:23:11.190332 I | ceph-cluster-controller: CR has changed for "my-cluster". diff=  v1.ClusterSpec{
+  	CephVersion: {Image: "quay.io/ceph/ceph:v18", AllowUnsupported: true},
+  	Storage: v1.StorageScopeSpec{
+  		Nodes: []v1.Node{
+  			{Name: "minikube-m02", Selection: {Devices: {{Name: "/dev/nvme3n1p2"}}}},
+  			{
+  				Name:      "minikube-m03",
+  				Resources: {},
+  				Config:    nil,
+  				Selection: v1.Selection{
+  					UseAllDevices:    nil,
+  					DeviceFilter:     "",
+  					DevicePathFilter: "",
+  					Devices: []v1.Device{
+  						{Name: "/dev/nvme0n1p2"},
+- 						{Name: "/dev/nvme1n1p2"},
+  					},
+  					VolumeClaimTemplates: nil,
+  				},
+  			},
+  		},
+  		UseAllNodes:           false,
+  		OnlyApplyOSDPlacement: false,
+  		... // 5 identical fields
+  	},
+  	Annotations: nil,
+  	Labels:      nil,
+  	... // 23 identical fields
+  }
+2024-05-28 08:23:11.190513 I | operator: reloading operator's CRDs manager, cancelling all orchestrations!
+2024-05-28 08:23:11.190797 I | ceph-cluster-controller: stopping monitoring of ceph status
+2024-05-28 08:23:11.190924 I | op-mon: stopping monitoring of mons in namespace "rook-ceph"
+2024-05-28 08:23:11.190997 I | op-osd: stopping monitoring of OSDs in namespace "rook-ceph"
+I0528 08:23:11.190844       1 manager.go:148] "msg"="stopping provisioner" "logger"="objectbucket.io/provisioner-manager" "name"="rook-ceph.ceph.rook.io/bucket" "reason"="context canceled"
+2024-05-28 08:23:11.198511 I | operator: watching all namespaces for Ceph CRs
+2024-05-28 08:23:11.198604 I | operator: setting up schemes
+2024-05-28 08:23:11.207508 I | operator: setting up the controller-runtime manager
+2024-05-28 08:23:11.208554 I | ceph-cluster-controller: successfully started
+2024-05-28 08:23:11.213614 I | ceph-cluster-controller: enabling hotplug orchestration
+2024-05-28 08:23:11.213746 I | ceph-nodedaemon-controller: successfully started
+2024-05-28 08:23:11.213798 D | ceph-nodedaemon-controller: watch for changes to the nodes
+2024-05-28 08:23:11.213828 D | ceph-nodedaemon-controller: watch for changes to the ceph-crash deployments
+2024-05-28 08:23:11.213848 D | ceph-nodedaemon-controller: watch for changes to the ceph pods and enqueue their nodes
+2024-05-28 08:23:11.213893 I | ceph-block-pool-controller: successfully started
+2024-05-28 08:23:11.213954 I | ceph-object-store-user-controller: successfully started
+2024-05-28 08:23:11.214002 I | ceph-object-realm-controller: successfully started
+2024-05-28 08:23:11.214034 I | ceph-object-zonegroup-controller: successfully started
+2024-05-28 08:23:11.214066 I | ceph-object-zone-controller: successfully started
+2024-05-28 08:23:11.214334 I | ceph-object-controller: successfully started
+2024-05-28 08:23:11.214418 I | ceph-file-controller: successfully started
+2024-05-28 08:23:11.214550 I | ceph-nfs-controller: successfully started
+2024-05-28 08:23:11.214668 I | ceph-rbd-mirror-controller: successfully started
+2024-05-28 08:23:11.214768 I | ceph-client-controller: successfully started
+2024-05-28 08:23:11.214815 I | ceph-filesystem-mirror-controller: successfully started
+2024-05-28 08:23:11.214867 I | operator: rook-ceph-operator-config-controller successfully started
+2024-05-28 08:23:11.214916 I | ceph-csi: rook-ceph-operator-csi-controller successfully started
+2024-05-28 08:23:11.215304 I | op-bucket-prov: rook-ceph-operator-bucket-controller successfully started
+2024-05-28 08:23:11.215366 I | ceph-bucket-topic: successfully started
+2024-05-28 08:23:11.215401 I | ceph-bucket-notification: successfully started
+2024-05-28 08:23:11.215442 I | ceph-bucket-notification: successfully started
+2024-05-28 08:23:11.215485 I | ceph-fs-subvolumegroup-controller: successfully started
+2024-05-28 08:23:11.215518 I | blockpool-rados-namespace-controller: successfully started
+2024-05-28 08:23:11.215594 I | ceph-cosi-controller: successfully started
+2024-05-28 08:23:11.215718 I | nvmeofstorage-controller: successfully started
+2024-05-28 08:23:11.215786 I | operator: starting the controller-runtime manager
+2024-05-28 08:23:11.322410 D | operator: reconciling rook-ceph/rook-ceph-operator-config
+2024-05-28 08:23:11.325309 I | operator: rook-ceph-operator-config-controller done reconciling
+2024-05-28 08:23:11.355196 D | clusterdisruption-controller: create event from ceph cluster CR
+2024-05-28 08:23:11.355392 D | clusterdisruption-controller: reconciling "rook-ceph/"
+2024-05-28 08:23:11.355632 D | clusterdisruption-controller: Using default maintenance timeout: 30m0s
+2024-05-28 08:23:11.355746 D | clusterdisruption-controller: could not match failure domain. defaulting to "host"
+2024-05-28 08:23:11.356166 D | exec: Running command: ceph status --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:11.356455 D | ceph-spec: create event from a CR: "builtin-mgr"
+2024-05-28 08:23:11.356514 D | ceph-spec: found 1 ceph clusters in namespace "rook-ceph"
+2024-05-28 08:23:11.356525 D | ceph-cluster-controller: create event from a CR
+2024-05-28 08:23:11.356690 D | ceph-spec: "ceph-block-pool-controller": CephCluster resource "my-cluster" found in namespace "rook-ceph"
+2024-05-28 08:23:11.356715 D | ceph-spec: "ceph-block-pool-controller": ceph status is "HEALTH_OK", operator is ready to run ceph command, reconciling
+2024-05-28 08:23:11.359476 D | ceph-spec: found existing monitor secrets for cluster rook-ceph
+2024-05-28 08:23:11.360060 D | ceph-spec: found 1 ceph clusters in namespace "rook-ceph"
+2024-05-28 08:23:11.360179 D | ceph-nodedaemon-controller: "rook-ceph-mgr-a-597c99b469-6k5cm" is a ceph pod!
+2024-05-28 08:23:11.360204 D | ceph-nodedaemon-controller: "rook-ceph-osd-1-6686d9d6c7-d6m4c" is a ceph pod!
+2024-05-28 08:23:11.360217 D | ceph-nodedaemon-controller: "rook-ceph-exporter-minikube-m02-56bcb7b547-jg5k4" is a ceph pod!
+2024-05-28 08:23:11.360227 D | ceph-nodedaemon-controller: "rook-ceph-exporter-minikube-m03-68f6448cbb-4c8b5" is a ceph pod!
+2024-05-28 08:23:11.360235 D | ceph-nodedaemon-controller: "rook-ceph-osd-2-7846bfd978-7d5mx" is a ceph pod!
+2024-05-28 08:23:11.360248 D | ceph-nodedaemon-controller: "rook-ceph-mon-a-689748fb4-2mlvz" is a ceph pod!
+2024-05-28 08:23:11.360265 D | ceph-nodedaemon-controller: "rook-ceph-osd-0-5c9fcff49-9fs9d" is a ceph pod!
+2024-05-28 08:23:11.360273 D | ceph-nodedaemon-controller: "rook-ceph-osd-prepare-minikube-m03-pb2r8" is a ceph pod!
+2024-05-28 08:23:11.360296 D | ceph-nodedaemon-controller: "rook-ceph-osd-prepare-minikube-m02-s42qh" is a ceph pod!
+2024-05-28 08:23:11.360325 D | ceph-nodedaemon-controller: reconciling node: "minikube-m02"
+2024-05-28 08:23:11.360444 D | ceph-spec: found 1 ceph clusters in namespace "rook-ceph"
+2024-05-28 08:23:11.361356 D | ceph-spec: ceph version found "18.2.2-0"
+2024-05-28 08:23:11.362127 D | ceph-cluster-controller: networkfences.csiaddons.openshift.io CRD not found, skip creating networkFence
+2024-05-28 08:23:11.363910 D | ceph-spec: found existing monitor secrets for cluster rook-ceph
+2024-05-28 08:23:11.364231 I | ceph-spec: parsing mon endpoints: a=10.96.159.97:6789
+2024-05-28 08:23:11.364362 D | ceph-spec: loaded: maxMonID=0, mons=map[a:0xc0017ea7b0], assignment=&{Schedule:map[a:0xc00234c1c0]}
+2024-05-28 08:23:11.364428 D | ceph-spec: ceph version found "18.2.2-0"
+2024-05-28 08:23:11.364511 I | ceph-block-pool-controller: creating pool ".mgr" in namespace "rook-ceph"
+2024-05-28 08:23:11.364571 D | exec: Running command: ceph osd crush rule create-replicated .mgr default host --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:11.365619 I | ceph-cluster-controller: reconciling ceph cluster in namespace "rook-ceph"
+2024-05-28 08:23:11.369046 I | ceph-spec: parsing mon endpoints: a=10.96.159.97:6789
+2024-05-28 08:23:11.369391 D | ceph-spec: loaded: maxMonID=0, mons=map[a:0xc000bb8540], assignment=&{Schedule:map[a:0xc000e50940]}
+2024-05-28 08:23:11.369622 I | op-bucket-prov: ceph bucket provisioner launched watching for provisioner "rook-ceph.ceph.rook.io/bucket"
+2024-05-28 08:23:11.369869 D | ceph-spec: found existing monitor secrets for cluster rook-ceph
+2024-05-28 08:23:11.370201 D | ceph-cluster-controller: networkfences.csiaddons.openshift.io CRD not found, skip creating networkFence
+2024-05-28 08:23:11.370847 I | op-bucket-prov: successfully reconciled bucket provisioner
+I0528 08:23:11.370937       1 manager.go:135] "msg"="starting provisioner" "logger"="objectbucket.io/provisioner-manager" "name"="rook-ceph.ceph.rook.io/bucket"
+2024-05-28 08:23:11.372757 D | ceph-nodedaemon-controller: ceph exporter successfully reconciled for node "minikube-m02". operation: "updated"
+2024-05-28 08:23:11.372835 D | op-k8sutil: creating service rook-ceph-exporter
+2024-05-28 08:23:11.594685 I | ceph-spec: parsing mon endpoints: a=10.96.159.97:6789
+2024-05-28 08:23:11.594950 D | ceph-spec: loaded: maxMonID=0, mons=map[a:0xc0012796b0], assignment=&{Schedule:map[a:0xc001aa4900]}
+2024-05-28 08:23:11.602199 I | ceph-cluster-controller: enabling ceph mon monitoring goroutine for cluster "rook-ceph"
+2024-05-28 08:23:11.602235 I | ceph-cluster-controller: enabling ceph osd monitoring goroutine for cluster "rook-ceph"
+2024-05-28 08:23:11.602246 I | ceph-cluster-controller: enabling ceph status monitoring goroutine for cluster "rook-ceph"
+2024-05-28 08:23:11.602254 D | ceph-cluster-controller: cluster spec successfully validated
+2024-05-28 08:23:11.602305 D | ceph-spec: CephCluster "rook-ceph" status: "Progressing". "Detecting Ceph version"
+2024-05-28 08:23:11.602357 D | op-mon: ceph mon status in namespace "rook-ceph" check interval "45s"
+2024-05-28 08:23:11.602427 I | op-mon: stopping monitoring of mons in namespace "rook-ceph"
+2024-05-28 08:23:11.602600 D | ceph-cluster-controller: checking health of cluster
+2024-05-28 08:23:11.602664 D | exec: Running command: ceph status --format json --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring
+2024-05-28 08:23:11.630022 D | ceph-spec: found 1 ceph clusters in namespace "rook-ceph"
+2024-05-28 08:23:11.630077 D | ceph-cluster-controller: update event on CephCluster CR
+2024-05-28 08:23:11.631362 I | ceph-spec: detecting the ceph image version for image quay.io/ceph/ceph:v18...
+2024-05-28 08:23:11.632021 D | ceph-spec: found 1 ceph clusters in namespace "rook-ceph"
+2024-05-28 08:23:11.632242 D | ceph-cluster-controller: update event on CephCluster CR
+2024-05-28 08:23:11.689587 D | exec: Running command: ceph osd pool get .mgr all --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:11.689912 D | cephclient: all placement groups have reached a clean state: [{StateName:active+clean Count:1}]
+2024-05-28 08:23:11.689933 D | clusterdisruption-controller: no OSD is down in the "host" failure domains: [minikube-m02 minikube-m03]. pg health: "all PGs in cluster are clean"
+2024-05-28 08:23:11.689978 D | clusterdisruption-controller: deleted temporary blocking pdb for "host" failure domain "minikube-m02".
+2024-05-28 08:23:11.689990 D | clusterdisruption-controller: deleted temporary blocking pdb for "host" failure domain "minikube-m03".
+W0528 08:23:11.690352       1 reflector.go:462] pkg/mod/k8s.io/client-go@v0.29.3/tools/cache/reflector.go:229: watch of *v1.Service ended with: an error on the server ("unable to decode an event from the watch stream: context canceled") has prevented the request from succeeding
+W0528 08:23:11.690402       1 reflector.go:462] pkg/mod/k8s.io/client-go@v0.29.3/tools/cache/reflector.go:229: watch of *v1.ConfigMap ended with: an error on the server ("unable to decode an event from the watch stream: context canceled") has prevented the request from succeeding
+W0528 08:23:11.690450       1 reflector.go:462] pkg/mod/k8s.io/client-go@v0.29.3/tools/cache/reflector.go:229: watch of *v1.CephObjectStore ended with: an error on the server ("unable to decode an event from the watch stream: context canceled") has prevented the request from succeeding
+W0528 08:23:11.690498       1 reflector.go:462] pkg/mod/k8s.io/client-go@v0.29.3/tools/cache/reflector.go:229: watch of *v1.Secret ended with: an error on the server ("unable to decode an event from the watch stream: context canceled") has prevented the request from succeeding
+W0528 08:23:11.690539       1 reflector.go:462] pkg/mod/k8s.io/client-go@v0.29.3/tools/cache/reflector.go:229: watch of *v1.CephRBDMirror ended with: an error on the server ("unable to decode an event from the watch stream: context canceled") has prevented the request from succeeding
+W0528 08:23:11.690606       1 reflector.go:462] pkg/mod/k8s.io/client-go@v0.29.3/tools/cache/reflector.go:229: watch of *v1.CephBlockPool ended with: an error on the server ("unable to decode an event from the watch stream: context canceled") has prevented the request from succeeding
+2024-05-28 08:23:11.691124 I | operator: successfully started the controller-runtime manager
+2024-05-28 08:23:11.798367 D | ceph-cluster-controller: networkfences.csiaddons.openshift.io CRD not found, skip creating networkFence
+2024-05-28 08:23:11.822572 D | cephclient: all placement groups have reached a clean state: [{StateName:active+clean Count:1}]
+2024-05-28 08:23:11.822647 D | clusterdisruption-controller: no OSD is down in the "host" failure domains: [minikube-m02 minikube-m03]. pg health: "all PGs in cluster are clean"
+2024-05-28 08:23:11.822775 D | clusterdisruption-controller: deleted temporary blocking pdb for "host" failure domain "minikube-m02".
+2024-05-28 08:23:11.822822 D | clusterdisruption-controller: deleted temporary blocking pdb for "host" failure domain "minikube-m03".
+2024-05-28 08:23:11.826329 D | clusterdisruption-controller: reconciling "rook-ceph/my-cluster"
+2024-05-28 08:23:11.826415 D | clusterdisruption-controller: Using default maintenance timeout: 30m0s
+2024-05-28 08:23:11.826459 D | clusterdisruption-controller: could not match failure domain. defaulting to "host"
+2024-05-28 08:23:11.826604 D | exec: Running command: ceph status --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:11.986916 D | ceph-cluster-controller: cluster status: {Health:{Status:HEALTH_OK Checks:map[]} FSID:cdc50353-3928-4864-9c74-995db84ea104 ElectionEpoch:3 Quorum:[0] QuorumNames:[a] MonMap:{Epoch:1 NumMons:1 FSID: CreatedTime: ModifiedTime: Mons:[]} OsdMap:{Epoch:22 NumOsd:3 NumUpOsd:3 NumInOsd:3 Full:false NearFull:false NumRemappedPgs:0} PgMap:{PgsByState:[{StateName:active+clean Count:1}] Version:0 NumPgs:1 DataBytes:590368 UsedBytes:88145920 AvailableBytes:11200056197120 TotalBytes:11200144343040 ReadBps:0 WriteBps:0 ReadOps:0 WriteOps:0 RecoveryBps:0 RecoveryObjectsPerSec:0 RecoveryKeysPerSec:0 CacheFlushBps:0 CacheEvictBps:0 CachePromoteBps:0} MgrMap:{Epoch:0 ActiveGID:0 ActiveName: ActiveAddr: Available:true Standbys:[]} Fsmap:{Epoch:1 ID:0 Up:0 In:0 Max:0 ByRank:[] UpStandby:0}}
+2024-05-28 08:23:11.992348 D | exec: Running command: ceph versions --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:12.012864 D | op-k8sutil: updating service rook-ceph-exporter
+2024-05-28 08:23:12.030973 D | exec: Running command: ceph osd pool application get .mgr --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:12.193426 D | ceph-csi: csi config map "rook-ceph-csi-config" (in "rook-ceph") has the expected owner; owner id: "d9977107-49d8-43ce-bc87-ce364f3ad8a5"
+2024-05-28 08:23:12.332977 D | cephclient: all placement groups have reached a clean state: [{StateName:active+clean Count:1}]
+2024-05-28 08:23:12.333052 D | clusterdisruption-controller: no OSD is down in the "host" failure domains: [minikube-m02 minikube-m03]. pg health: "all PGs in cluster are clean"
+2024-05-28 08:23:12.333168 D | clusterdisruption-controller: deleted temporary blocking pdb for "host" failure domain "minikube-m02".
+2024-05-28 08:23:12.333206 D | clusterdisruption-controller: deleted temporary blocking pdb for "host" failure domain "minikube-m03".
+2024-05-28 08:23:12.394905 D | op-k8sutil: ConfigMap rook-ceph-detect-version is already deleted
+2024-05-28 08:23:12.426273 D | cephclient: {"mon":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":1},"mgr":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":1},"osd":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":3},"overall":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":5}}
+2024-05-28 08:23:12.426320 D | cephclient: {"mon":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":1},"mgr":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":1},"osd":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":3},"overall":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":5}}
+2024-05-28 08:23:12.426445 D | ceph-cluster-controller: updating ceph cluster "rook-ceph" status and condition to &{Health:{Status:HEALTH_OK Checks:map[]} FSID:cdc50353-3928-4864-9c74-995db84ea104 ElectionEpoch:3 Quorum:[0] QuorumNames:[a] MonMap:{Epoch:1 NumMons:1 FSID: CreatedTime: ModifiedTime: Mons:[]} OsdMap:{Epoch:22 NumOsd:3 NumUpOsd:3 NumInOsd:3 Full:false NearFull:false NumRemappedPgs:0} PgMap:{PgsByState:[{StateName:active+clean Count:1}] Version:0 NumPgs:1 DataBytes:590368 UsedBytes:88145920 AvailableBytes:11200056197120 TotalBytes:11200144343040 ReadBps:0 WriteBps:0 ReadOps:0 WriteOps:0 RecoveryBps:0 RecoveryObjectsPerSec:0 RecoveryKeysPerSec:0 CacheFlushBps:0 CacheEvictBps:0 CachePromoteBps:0} MgrMap:{Epoch:0 ActiveGID:0 ActiveName: ActiveAddr: Available:true Standbys:[]} Fsmap:{Epoch:1 ID:0 Up:0 In:0 Max:0 ByRank:[] UpStandby:0}}, True, ClusterCreated, Cluster created successfully
+2024-05-28 08:23:12.426466 D | ceph-spec: CephCluster "rook-ceph" status: "Ready". "Cluster created successfully"
+2024-05-28 08:23:12.439825 D | ceph-spec: found 1 ceph clusters in namespace "rook-ceph"
+2024-05-28 08:23:12.439884 D | ceph-cluster-controller: update event on CephCluster CR
+2024-05-28 08:23:12.550588 I | cephclient: application "mgr" is already set on pool ".mgr"
+2024-05-28 08:23:12.550650 I | cephclient: reconciling replicated pool .mgr succeeded
+2024-05-28 08:23:12.550669 D | cephclient: skipping check for failure domain and deviceClass on pool ".mgr" as it is not specified
+2024-05-28 08:23:12.550686 I | ceph-block-pool-controller: initializing pool ".mgr" for RBD use
+2024-05-28 08:23:12.550733 D | exec: Running command: rbd pool init .mgr --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring
+2024-05-28 08:23:12.626530 I | ceph-block-pool-controller: successfully initialized pool ".mgr" for RBD use
+2024-05-28 08:23:12.626584 D | ceph-block-pool-controller: configuring RBD per-image IO statistics collection
+2024-05-28 08:23:12.626727 D | exec: Running command: ceph config get mgr mgr/prometheus/rbd_stats_pools --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:13.069611 D | ceph-block-pool-controller: RBD per-image IO statistics will be collected for pools: []
+2024-05-28 08:23:13.069680 I | op-config: setting "mgr"="mgr/prometheus/rbd_stats_pools"="" option to the mon configuration database
+2024-05-28 08:23:13.069733 D | exec: Running command: ceph config set mgr mgr/prometheus/rbd_stats_pools  --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:13.197652 D | ceph-nodedaemon-controller: crash collector is disabled in namespace "rook-ceph" so skipping crash retention reconcile
+2024-05-28 08:23:13.197830 D | ceph-nodedaemon-controller: reconciling node: "minikube-m03"
+2024-05-28 08:23:13.198733 D | ceph-spec: ceph version found "18.2.2-0"
+2024-05-28 08:23:13.214505 D | ceph-nodedaemon-controller: ceph exporter successfully reconciled for node "minikube-m03". operation: "updated"
+2024-05-28 08:23:13.214538 D | op-k8sutil: creating service rook-ceph-exporter
+2024-05-28 08:23:13.393575 D | ceph-spec: found existing monitor secrets for cluster rook-ceph
+2024-05-28 08:23:13.471800 I | op-config: successfully set "mgr"="mgr/prometheus/rbd_stats_pools"="" option to the mon configuration database
+2024-05-28 08:23:13.471861 D | ceph-block-pool-controller: configured RBD per-image IO statistics collection
+2024-05-28 08:23:13.471880 D | ceph-block-pool-controller: reconciling create rbd mirror peer configuration
+2024-05-28 08:23:13.471901 D | cephclient: retrieving mirroring pool ".mgr" info
+2024-05-28 08:23:13.471960 D | exec: Running command: rbd mirror pool info .mgr --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:13.541244 I | cephclient: disabling mirroring for pool ".mgr"
+2024-05-28 08:23:13.541328 D | exec: Running command: rbd mirror pool disable .mgr --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring
+2024-05-28 08:23:13.606796 D | op-k8sutil: updating service rook-ceph-exporter
+2024-05-28 08:23:13.623022 I | ceph-block-pool-controller: successfully disabled mirroring on the pool ".mgr"
+2024-05-28 08:23:13.630057 D | ceph-block-pool-controller: pool "rook-ceph/builtin-mgr" status updated to "Ready"
+2024-05-28 08:23:13.630080 D | ceph-block-pool-controller: done reconciling
+2024-05-28 08:23:13.630101 D | ceph-block-pool-controller: successfully configured CephBlockPool "rook-ceph/builtin-mgr"
+2024-05-28 08:23:13.794446 I | ceph-spec: parsing mon endpoints: a=10.96.159.97:6789
+2024-05-28 08:23:13.794590 D | ceph-spec: loaded: maxMonID=0, mons=map[a:0xc002101ef0], assignment=&{Schedule:map[a:0xc0013e9d80]}
+2024-05-28 08:23:13.794649 D | ceph-csi: cluster "rook-ceph/rook-ceph-operator-config": not deploying the ceph-csi plugin holder
+2024-05-28 08:23:13.794672 D | ceph-csi: using "rook-ceph" for csi configmap namespace
+2024-05-28 08:23:14.135478 D | CmdReporter: job rook-ceph-detect-version has returned results
+2024-05-28 08:23:14.199264 I | ceph-csi: Kubernetes version is 1.30
+2024-05-28 08:23:14.397456 D | ceph-nodedaemon-controller: crash collector is disabled in namespace "rook-ceph" so skipping crash retention reconcile
+2024-05-28 08:23:14.397657 D | ceph-nodedaemon-controller: reconciling node: "minikube"
+2024-05-28 08:23:14.398653 D | ceph-spec: ceph version found "18.2.2-0"
+2024-05-28 08:23:14.398831 D | ceph-nodedaemon-controller: crash collector is disabled in namespace "rook-ceph" so skipping crash retention reconcile
+2024-05-28 08:23:14.398962 D | ceph-nodedaemon-controller: reconciling node: "minikube-m02"
+2024-05-28 08:23:14.399900 D | ceph-spec: ceph version found "18.2.2-0"
+2024-05-28 08:23:14.417663 D | ceph-nodedaemon-controller: ceph exporter successfully reconciled for node "minikube-m02". operation: "updated"
+2024-05-28 08:23:14.417736 D | op-k8sutil: creating service rook-ceph-exporter
+2024-05-28 08:23:14.812824 I | ceph-csi: detecting the ceph csi image version for image "quay.io/cephcsi/cephcsi:v3.11.0"
+2024-05-28 08:23:15.012021 D | op-k8sutil: updating service rook-ceph-exporter
+2024-05-28 08:23:15.196073 I | ceph-spec: detected ceph image version: "18.2.2-0 reef"
+2024-05-28 08:23:15.196129 I | ceph-cluster-controller: validating ceph version from provided image
+2024-05-28 08:23:15.205507 D | ceph-spec: object "rook-ceph-detect-version" did not match on delete
+2024-05-28 08:23:15.205532 D | ceph-spec: object "rook-ceph-detect-version" did not match on delete
+2024-05-28 08:23:15.205541 D | ceph-spec: object "rook-ceph-detect-version" did not match on delete
+2024-05-28 08:23:15.205554 D | ceph-spec: object "rook-ceph-detect-version" did not match on delete
+2024-05-28 08:23:15.395921 D | op-k8sutil: ConfigMap rook-ceph-csi-detect-version is already deleted
+2024-05-28 08:23:15.804392 D | ceph-spec: found existing monitor secrets for cluster rook-ceph
+2024-05-28 08:23:16.197736 D | ceph-nodedaemon-controller: crash collector is disabled in namespace "rook-ceph" so skipping crash retention reconcile
+2024-05-28 08:23:16.395971 I | ceph-spec: parsing mon endpoints: a=10.96.159.97:6789
+2024-05-28 08:23:16.396102 D | ceph-spec: loaded: maxMonID=0, mons=map[a:0xc001a90660], assignment=&{Schedule:map[a:0xc001a10980]}
+2024-05-28 08:23:16.594951 D | cephclient: No ceph configuration override to merge as "rook-config-override" configmap is empty
+2024-05-28 08:23:16.595027 I | cephclient: writing config file /var/lib/rook/rook-ceph/rook-ceph.config
+2024-05-28 08:23:16.595331 I | cephclient: generated admin config in /var/lib/rook/rook-ceph
+2024-05-28 08:23:16.595423 D | exec: Running command: ceph versions --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:17.013009 D | cephclient: {"mon":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":1},"mgr":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":1},"osd":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":3},"overall":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":5}}
+2024-05-28 08:23:17.013105 D | cephclient: {"mon":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":1},"mgr":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":1},"osd":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":3},"overall":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":5}}
+2024-05-28 08:23:17.013298 D | ceph-cluster-controller: both cluster and image spec versions are identical, doing nothing 18.2.2-0 reef
+2024-05-28 08:23:17.013346 I | ceph-cluster-controller: cluster "rook-ceph": version "18.2.2-0 reef" detected for image "quay.io/ceph/ceph:v18"
+2024-05-28 08:23:17.039095 D | ceph-spec: CephCluster "rook-ceph" status: "Progressing". "Configuring the Ceph cluster"
+2024-05-28 08:23:17.049803 D | ceph-spec: found 1 ceph clusters in namespace "rook-ceph"
+2024-05-28 08:23:17.049824 D | ceph-cluster-controller: update event on CephCluster CR
+2024-05-28 08:23:17.056595 D | ceph-cluster-controller: cluster helm chart is not configured, not adding helm annotations to configmap
+2024-05-28 08:23:17.056613 D | ceph-cluster-controller: monitors are about to reconcile, executing pre actions
+2024-05-28 08:23:17.056651 D | ceph-spec: CephCluster "rook-ceph" status: "Progressing". "Configuring Ceph Mons"
+2024-05-28 08:23:17.075396 D | op-mon: Acquiring lock for mon orchestration
+2024-05-28 08:23:17.075413 D | op-mon: Acquired lock for mon orchestration
+2024-05-28 08:23:17.075423 I | op-mon: start running mons
+2024-05-28 08:23:17.075428 D | op-mon: establishing ceph cluster info
+2024-05-28 08:23:17.076897 D | ceph-spec: found 1 ceph clusters in namespace "rook-ceph"
+2024-05-28 08:23:17.076952 D | ceph-cluster-controller: update event on CephCluster CR
+2024-05-28 08:23:17.078720 D | ceph-spec: found existing monitor secrets for cluster rook-ceph
+2024-05-28 08:23:17.194152 I | ceph-spec: parsing mon endpoints: a=10.96.159.97:6789
+2024-05-28 08:23:17.194292 D | ceph-spec: loaded: maxMonID=0, mons=map[a:0xc000c204b0], assignment=&{Schedule:map[a:0xc000d51480]}
+2024-05-28 08:23:17.744445 D | CmdReporter: job rook-ceph-csi-detect-version has returned results
+2024-05-28 08:23:18.199167 D | op-mon: updating config map rook-ceph-mon-endpoints that already exists
+2024-05-28 08:23:18.397472 I | ceph-csi: Detected ceph CSI image version: "v3.11.0"
+2024-05-28 08:23:18.408769 D | ceph-spec: object "rook-ceph-csi-detect-version" did not match on delete
+2024-05-28 08:23:18.408836 D | ceph-spec: object "rook-ceph-csi-detect-version" did not match on delete
+2024-05-28 08:23:18.408860 D | ceph-spec: object "rook-ceph-csi-detect-version" did not match on delete
+2024-05-28 08:23:18.408890 D | ceph-spec: object "rook-ceph-csi-detect-version" did not match on delete
+2024-05-28 08:23:18.508045 I | ceph-csi: successfully started CSI Ceph RBD driver
+2024-05-28 08:23:18.591989 I | ceph-csi: successfully started CSI CephFS driver
+2024-05-28 08:23:18.596329 I | op-mon: saved mon endpoints to config map map[csi-cluster-config-json:[{"clusterID":"rook-ceph","monitors":["10.96.159.97:6789"],"cephFS":{"netNamespaceFilePath":"","subvolumeGroup":"","kernelMountOptions":"","fuseMountOptions":""},"rbd":{"netNamespaceFilePath":"","radosNamespace":""},"nfs":{"netNamespaceFilePath":""},"readAffinity":{"enabled":false,"crushLocationLabels":null},"namespace":""}] data:a=10.96.159.97:6789 mapping:{"node":{"a":{"Name":"minikube-m02","Hostname":"minikube-m02","Address":"192.168.58.3"}}} maxMonId:0 outOfQuorum:]
+2024-05-28 08:23:18.600300 I | ceph-csi: CSIDriver object updated for driver "rook-ceph.rbd.csi.ceph.com"
+2024-05-28 08:23:18.607525 I | ceph-csi: CSIDriver object updated for driver "rook-ceph.cephfs.csi.ceph.com"
+2024-05-28 08:23:18.607579 I | ceph-csi: CSI NFS driver disabled
+2024-05-28 08:23:18.607676 I | op-k8sutil: removing daemonset csi-nfsplugin if it exists
+2024-05-28 08:23:18.610790 D | op-k8sutil: removing csi-nfsplugin-provisioner deployment if it exists
+2024-05-28 08:23:18.610831 I | op-k8sutil: removing deployment csi-nfsplugin-provisioner if it exists
+2024-05-28 08:23:18.801326 D | op-config: updating config secret "rook-ceph-config"
+2024-05-28 08:23:18.999257 D | ceph-csi: rook-ceph.nfs.csi.ceph.com CSIDriver not found; skipping deletion.
+2024-05-28 08:23:18.999312 I | ceph-csi: successfully removed CSI NFS driver
+2024-05-28 08:23:19.395974 D | cephclient: No ceph configuration override to merge as "rook-config-override" configmap is empty
+2024-05-28 08:23:19.396048 I | cephclient: writing config file /var/lib/rook/rook-ceph/rook-ceph.config
+2024-05-28 08:23:19.396435 I | cephclient: generated admin config in /var/lib/rook/rook-ceph
+2024-05-28 08:23:19.396484 D | ceph-csi: using "rook-ceph" for csi configmap namespace
+2024-05-28 08:23:19.996028 D | op-cfg-keyring: updating secret for rook-ceph-mons-keyring
+2024-05-28 08:23:20.395346 D | op-cfg-keyring: updating secret for rook-ceph-admin-keyring
+2024-05-28 08:23:20.995517 I | op-mon: targeting the mon count 1
+2024-05-28 08:23:21.001278 D | op-mon: Host network for mon "a" is false
+2024-05-28 08:23:21.001355 D | op-mon: mon a already scheduled
+2024-05-28 08:23:21.001371 D | op-mon: mons have been scheduled
+2024-05-28 08:23:21.007490 I | op-config: applying ceph settings:
+[global]
+mon allow pool delete   = true
+mon cluster log file    =
+mon allow pool size one = true
+2024-05-28 08:23:21.007575 D | exec: Running command: ceph config assimilate-conf -i /var/lib/rook/1036531615 -o /var/lib/rook/1036531615.out --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:21.489806 I | op-config: successfully applied settings to the mon configuration database
+2024-05-28 08:23:21.489996 I | op-config: applying ceph settings:
+[global]
+log to file = false
+2024-05-28 08:23:21.490051 D | exec: Running command: ceph config assimilate-conf -i /var/lib/rook/1650740772 -o /var/lib/rook/1650740772.out --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:21.996653 I | op-config: successfully applied settings to the mon configuration database
+2024-05-28 08:23:21.996812 I | op-config: deleting "global" "log file" option from the mon configuration database
+2024-05-28 08:23:21.996925 D | exec: Running command: ceph config rm global log_file --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:22.414133 I | op-config: successfully deleted "log file" option from the mon configuration database
+2024-05-28 08:23:22.414189 I | op-mon: checking for basic quorum with existing mons
+2024-05-28 08:23:22.419751 D | op-k8sutil: creating service rook-ceph-mon-a
+2024-05-28 08:23:22.439095 D | op-k8sutil: updating service rook-ceph-mon-a
+2024-05-28 08:23:22.449166 I | op-mon: mon "a" cluster IP is 10.96.159.97
+2024-05-28 08:23:22.459533 D | op-mon: updating config map rook-ceph-mon-endpoints that already exists
+2024-05-28 08:23:22.463051 I | op-mon: saved mon endpoints to config map map[csi-cluster-config-json:[{"clusterID":"rook-ceph","monitors":["10.96.159.97:6789"],"cephFS":{"netNamespaceFilePath":"","subvolumeGroup":"","kernelMountOptions":"","fuseMountOptions":""},"rbd":{"netNamespaceFilePath":"","radosNamespace":""},"nfs":{"netNamespaceFilePath":""},"readAffinity":{"enabled":false,"crushLocationLabels":null},"namespace":""}] data:a=10.96.159.97:6789 mapping:{"node":{"a":{"Name":"minikube-m02","Hostname":"minikube-m02","Address":"192.168.58.3"}}} maxMonId:0 outOfQuorum:]
+2024-05-28 08:23:22.594370 D | op-config: updating config secret "rook-ceph-config"
+2024-05-28 08:23:22.995159 D | cephclient: No ceph configuration override to merge as "rook-config-override" configmap is empty
+2024-05-28 08:23:22.995713 I | cephclient: writing config file /var/lib/rook/rook-ceph/rook-ceph.config
+2024-05-28 08:23:22.996048 I | cephclient: generated admin config in /var/lib/rook/rook-ceph
+2024-05-28 08:23:22.996098 D | ceph-csi: using "rook-ceph" for csi configmap namespace
+2024-05-28 08:23:23.409662 D | op-mon: monConfig: &{ResourceName:rook-ceph-mon-a DaemonName:a PublicIP:10.96.159.97 Port:6789 Zone: NodeName:minikube-m02 DataPathMap:0xc00129d1d0 UseHostNetwork:false}
+2024-05-28 08:23:23.424853 D | op-mon: adding host path volume source to mon deployment rook-ceph-mon-a
+2024-05-28 08:23:23.425159 I | op-mon: deployment for mon rook-ceph-mon-a already exists. updating if needed
+2024-05-28 08:23:23.450260 I | op-k8sutil: deployment "rook-ceph-mon-a" did not change, nothing to update
+2024-05-28 08:23:23.450314 I | op-mon: waiting for mon quorum with [a]
+2024-05-28 08:23:23.602286 I | op-mon: mons running: [a]
+2024-05-28 08:23:23.602349 D | exec: Running command: ceph quorum_status --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:24.107595 I | op-mon: Monitors in quorum: [a]
+2024-05-28 08:23:24.107799 I | op-mon: mons created: 1
+2024-05-28 08:23:24.107851 D | exec: Running command: ceph versions --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:24.672241 D | cephclient: {"mon":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":1},"mgr":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":1},"osd":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":3},"overall":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":5}}
+2024-05-28 08:23:24.672296 D | cephclient: {"mon":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":1},"mgr":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":1},"osd":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":3},"overall":{"ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable)":5}}
+2024-05-28 08:23:24.672405 I | op-mon: waiting for mon quorum with [a]
+2024-05-28 08:23:24.683365 I | op-mon: mons running: [a]
+2024-05-28 08:23:24.683434 D | exec: Running command: ceph quorum_status --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:25.125191 I | op-mon: Monitors in quorum: [a]
+2024-05-28 08:23:25.125292 I | ceph-spec: not applying network settings for cluster "rook-ceph" ceph networks
+2024-05-28 08:23:25.125311 D | op-mon: mon endpoints used are: a=10.96.159.97:6789
+2024-05-28 08:23:25.125318 D | op-mon: managePodBudgets is set, but mon-count <= 2. Not creating a disruptionbudget for Mons
+2024-05-28 08:23:25.125324 D | op-mon: skipping check for orphaned mon pvcs since using the host path
+2024-05-28 08:23:25.125331 D | op-mon: Released lock for mon orchestration
+2024-05-28 08:23:25.125366 D | ceph-cluster-controller: monitors are up and running, executing post actions
+2024-05-28 08:23:25.125383 I | cephclient: getting or creating ceph auth key "client.csi-rbd-provisioner"
+2024-05-28 08:23:25.125412 D | exec: Running command: ceph auth get-or-create-key client.csi-rbd-provisioner mon profile rbd, allow command 'osd blocklist' mgr allow rw osd profile rbd --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:25.547356 I | cephclient: getting or creating ceph auth key "client.csi-rbd-node"
+2024-05-28 08:23:25.547453 D | exec: Running command: ceph auth get-or-create-key client.csi-rbd-node mon profile rbd mgr allow rw osd profile rbd --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:26.098951 I | cephclient: getting or creating ceph auth key "client.csi-cephfs-provisioner"
+2024-05-28 08:23:26.098990 D | exec: Running command: ceph auth get-or-create-key client.csi-cephfs-provisioner mon allow r, allow command 'osd blocklist' mgr allow rw osd allow rw tag cephfs metadata=* mds allow * --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:26.632637 I | cephclient: getting or creating ceph auth key "client.csi-cephfs-node"
+2024-05-28 08:23:26.632742 D | exec: Running command: ceph auth get-or-create-key client.csi-cephfs-node mon allow r mgr allow rw osd allow rw tag cephfs *=* mds allow rw --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-05-28 08:23:27.225075 D | op-cfg-keyring: updating secret for rook-csi-rbd-node
+2024-05-28 08:23:27.231837 D | op-cfg-keyring: updating secret for rook-csi-cephfs-provisioner
+2024-05-28 08:23:27.239273 D | op-cfg-keyring: updating secret for rook-csi-cephfs-node
+2024-05-28 08:23:27.247381 D | op-cfg-keyring: updating secret for rook-csi-rbd-provisioner
+2024-05-28 08:23:27.251524 I | ceph-csi: created kubernetes csi secrets for cluster "rook-ceph"
+2024-05-28 08:23:27.251570 I | cephclient: getting or creating ceph auth key "client.crash"
+2024-05-28 08:23:27.251657 D | exec: Running command: ceph auth get-or-create-key client.crash mon allow profile crash mgr allow rw --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json

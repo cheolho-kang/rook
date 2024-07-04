@@ -1,0 +1,17 @@
+apiVersion: v1
+data:
+  csi-cluster-config-json: '[{"clusterID":"rook-ceph","monitors":["10.43.11.253:6789"],"cephFS":{"netNamespaceFilePath":"","subvolumeGroup":"","kernelMountOptions":"","fuseMountOptions":""},"rbd":{"netNamespaceFilePath":"","radosNamespace":""},"nfs":{"netNamespaceFilePath":""},"readAffinity":{"enabled":false,"crushLocationLabels":["kubernetes.io/hostname","topology.kubernetes.io/region","topology.kubernetes.io/zone","topology.rook.io/chassis","topology.rook.io/rack","topology.rook.io/row","topology.rook.io/pdu","topology.rook.io/pod","topology.rook.io/room","topology.rook.io/datacenter"]},"namespace":"rook-ceph"}]'
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2024-06-04T05:33:00Z"
+  name: rook-ceph-csi-config
+  namespace: rook-ceph
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: false
+    controller: true
+    kind: Deployment
+    name: rook-ceph-operator
+    uid: d278c0a8-e7a8-484f-b1d4-97a8863b18f8
+  resourceVersion: "9165"
+  uid: 1102f6a1-d8b7-44e0-9415-b78b5cfec313

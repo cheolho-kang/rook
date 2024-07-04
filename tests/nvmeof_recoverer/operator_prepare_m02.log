@@ -1,0 +1,242 @@
+2024/06/23 08:39:02 maxprocs: Leaving GOMAXPROCS=8: CPU quota undefined
+2024-06-23 08:39:02.926933 I | cephcmd: desired devices to configure osds: [{Name:/dev/nvme0n1 OSDsPerDevice:1 MetadataDevice: DatabaseSizeMB:0 DeviceClass: InitialWeight: IsFilter:false IsDevicePathFilter:false} {Name:/dev/nvme1n1 OSDsPerDevice:1 MetadataDevice: DatabaseSizeMB:0 DeviceClass: InitialWeight: IsFilter:false IsDevicePathFilter:false}]
+2024-06-23 08:39:02.928181 I | rookcmd: starting Rook v1.14.0-alpha.0.216.g39fc35959-dirty with arguments '/rook/rook ceph osd provision'
+2024-06-23 08:39:02.928208 I | rookcmd: flag values: --cluster-id=eb344193-4e97-4248-beef-f8ae04162118, --cluster-name=my-cluster, --data-device-filter=, --data-device-path-filter=, --data-devices=[{"id":"/dev/nvme0n1","storeConfig":{"osdsPerDevice":1}},{"id":"/dev/nvme1n1","storeConfig":{"osdsPerDevice":1}}], --encrypted-device=false, --force-format=false, --help=false, --location=, --log-level=DEBUG, --metadata-device=, --node-name=minikube-m02, --osd-crush-device-class=, --osd-crush-initial-weight=, --osd-database-size=0, --osd-store-type=bluestore, --osd-wal-size=576, --osds-per-device=1, --pvc-backed-osd=false, --replace-osd=-1
+2024-06-23 08:39:02.928215 I | ceph-spec: parsing mon endpoints: a=10.101.86.246:6789
+2024-06-23 08:39:02.942379 I | op-osd: CRUSH location=root=default host=minikube-m02
+2024-06-23 08:39:02.942417 I | cephcmd: crush location of osd: root=default host=minikube-m02
+2024-06-23 08:39:02.946864 D | cephclient: No ceph configuration override to merge as "rook-config-override" configmap is empty
+2024-06-23 08:39:02.946905 I | cephclient: writing config file /var/lib/rook/rook-ceph/rook-ceph.config
+2024-06-23 08:39:02.947033 I | cephclient: generated admin config in /var/lib/rook/rook-ceph
+2024-06-23 08:39:02.947136 D | cephclient: config file @ /etc/ceph/ceph.conf:
+[global]
+fsid                = e162cf6d-cd1f-4c9f-a49e-81d47f948fb4
+mon initial members = a
+mon host            = [v2:10.101.86.246:3300,v1:10.101.86.246:6789]
+
+[client.admin]
+keyring = /var/lib/rook/rook-ceph/client.admin.keyring
+2024-06-23 08:39:02.947144 D | exec: Running command: dmsetup version
+2024-06-23 08:39:02.954426 I | cephosd: Library version:   1.02.181-RHEL8 (2021-10-20)
+Driver version:    4.48.0
+2024-06-23 08:39:02.963428 I | cephosd: discovering hardware
+2024-06-23 08:39:02.963447 D | exec: Running command: lsblk --all --noheadings --list --output KNAME
+2024-06-23 08:39:02.974544 D | exec: Running command: lsblk /dev/loop0 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:02.985908 D | sys: lsblk output: "SIZE=\"67051520\" ROTA=\"1\" RO=\"1\" TYPE=\"loop\" PKNAME=\"\" NAME=\"/dev/loop0\" KNAME=\"/dev/loop0\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:02.985969 W | inventory: skipping device "loop0". unsupported diskType loop
+2024-06-23 08:39:02.986034 D | exec: Running command: lsblk /dev/loop1 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:02.996563 D | sys: lsblk output: "SIZE=\"67051520\" ROTA=\"1\" RO=\"1\" TYPE=\"loop\" PKNAME=\"\" NAME=\"/dev/loop1\" KNAME=\"/dev/loop1\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:02.996613 W | inventory: skipping device "loop1". unsupported diskType loop
+2024-06-23 08:39:02.996628 D | exec: Running command: lsblk /dev/loop2 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.007033 D | sys: lsblk output: "SIZE=\"91246592\" ROTA=\"1\" RO=\"1\" TYPE=\"loop\" PKNAME=\"\" NAME=\"/dev/loop2\" KNAME=\"/dev/loop2\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:03.007077 W | inventory: skipping device "loop2". unsupported diskType loop
+2024-06-23 08:39:03.007090 D | exec: Running command: lsblk /dev/loop3 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.017015 D | sys: lsblk output: "SIZE=\"91258880\" ROTA=\"1\" RO=\"1\" TYPE=\"loop\" PKNAME=\"\" NAME=\"/dev/loop3\" KNAME=\"/dev/loop3\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:03.017061 W | inventory: skipping device "loop3". unsupported diskType loop
+2024-06-23 08:39:03.017073 D | exec: Running command: lsblk /dev/loop4 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.026946 D | sys: lsblk output: "SIZE=\"40615936\" ROTA=\"1\" RO=\"1\" TYPE=\"loop\" PKNAME=\"\" NAME=\"/dev/loop4\" KNAME=\"/dev/loop4\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:03.026990 W | inventory: skipping device "loop4". unsupported diskType loop
+2024-06-23 08:39:03.027013 D | exec: Running command: lsblk /dev/loop5 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.036890 D | sys: lsblk output: "SIZE=\"40714240\" ROTA=\"1\" RO=\"1\" TYPE=\"loop\" PKNAME=\"\" NAME=\"/dev/loop5\" KNAME=\"/dev/loop5\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:03.036938 W | inventory: skipping device "loop5". unsupported diskType loop
+2024-06-23 08:39:03.036952 D | exec: Running command: lsblk /dev/loop6 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.042783 E | sys: failed to execute lsblk. output: .
+2024-06-23 08:39:03.042822 W | inventory: skipping device "loop6". exit status 32
+2024-06-23 08:39:03.042832 D | exec: Running command: lsblk /dev/loop7 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.048389 E | sys: failed to execute lsblk. output: .
+2024-06-23 08:39:03.048408 W | inventory: skipping device "loop7". exit status 32
+2024-06-23 08:39:03.048416 D | exec: Running command: lsblk /dev/sr0 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.058327 D | sys: lsblk output: "SIZE=\"2048\" ROTA=\"1\" RO=\"0\" TYPE=\"rom\" PKNAME=\"\" NAME=\"/dev/sr0\" KNAME=\"/dev/sr0\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:03.058355 W | inventory: skipping device "sr0". unsupported diskType rom
+2024-06-23 08:39:03.058364 D | exec: Running command: lsblk /dev/nbd0 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.063751 E | sys: failed to execute lsblk. output: .
+2024-06-23 08:39:03.063768 W | inventory: skipping device "nbd0". exit status 32
+2024-06-23 08:39:03.063777 D | exec: Running command: lsblk /dev/nbd1 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.069122 E | sys: failed to execute lsblk. output: .
+2024-06-23 08:39:03.069138 W | inventory: skipping device "nbd1". exit status 32
+2024-06-23 08:39:03.069145 D | exec: Running command: lsblk /dev/nbd2 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.076662 E | sys: failed to execute lsblk. output: .
+2024-06-23 08:39:03.076694 W | inventory: skipping device "nbd2". exit status 32
+2024-06-23 08:39:03.076702 D | exec: Running command: lsblk /dev/nbd3 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.082180 E | sys: failed to execute lsblk. output: .
+2024-06-23 08:39:03.082200 W | inventory: skipping device "nbd3". exit status 32
+2024-06-23 08:39:03.082208 D | exec: Running command: lsblk /dev/nbd4 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.085171 E | sys: failed to execute lsblk. output: .
+2024-06-23 08:39:03.085268 W | inventory: skipping device "nbd4". exit status 32
+2024-06-23 08:39:03.085287 D | exec: Running command: lsblk /dev/nbd5 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.092130 E | sys: failed to execute lsblk. output: .
+2024-06-23 08:39:03.092170 W | inventory: skipping device "nbd5". exit status 32
+2024-06-23 08:39:03.092188 D | exec: Running command: lsblk /dev/nbd6 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.100134 E | sys: failed to execute lsblk. output: .
+2024-06-23 08:39:03.100201 W | inventory: skipping device "nbd6". exit status 32
+2024-06-23 08:39:03.100380 D | exec: Running command: lsblk /dev/nbd7 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.106621 E | sys: failed to execute lsblk. output: .
+2024-06-23 08:39:03.106668 W | inventory: skipping device "nbd7". exit status 32
+2024-06-23 08:39:03.106689 D | exec: Running command: lsblk /dev/vda --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.112962 D | sys: lsblk output: "SIZE=\"274877906944\" ROTA=\"1\" RO=\"0\" TYPE=\"disk\" PKNAME=\"\" NAME=\"/dev/vda\" KNAME=\"/dev/vda\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:03.113023 D | exec: Running command: sgdisk --print /dev/vda
+2024-06-23 08:39:03.119375 D | exec: Running command: udevadm info --query=property /dev/vda
+2024-06-23 08:39:03.136010 D | sys: udevadm info output: "DEVNAME=/dev/vda\nDEVPATH=/devices/pci0000:00/0000:00:02.3/0000:04:00.0/virtio2/block/vda\nDEVTYPE=disk\nDISKSEQ=9\nMAJOR=253\nMINOR=0\nSUBSYSTEM=block"
+2024-06-23 08:39:03.136106 D | exec: Running command: lsblk --noheadings --path --list --output NAME /dev/vda
+2024-06-23 08:39:03.143096 I | inventory: skipping device "vda" because it has child, considering the child instead.
+2024-06-23 08:39:03.143144 D | exec: Running command: lsblk /dev/vda1 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.152597 D | sys: lsblk output: "SIZE=\"1127219200\" ROTA=\"1\" RO=\"0\" TYPE=\"part\" PKNAME=\"/dev/vda\" NAME=\"/dev/vda1\" KNAME=\"/dev/vda1\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:03.152665 D | exec: Running command: udevadm info --query=property /dev/vda1
+2024-06-23 08:39:03.166842 D | sys: udevadm info output: "DEVNAME=/dev/vda1\nDEVPATH=/devices/pci0000:00/0000:00:02.3/0000:04:00.0/virtio2/block/vda/vda1\nDEVTYPE=partition\nDISKSEQ=9\nMAJOR=253\nMINOR=1\nPARTN=1\nSUBSYSTEM=block"
+2024-06-23 08:39:03.166909 D | exec: Running command: lsblk /dev/vda2 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.177100 D | sys: lsblk output: "SIZE=\"2147483648\" ROTA=\"1\" RO=\"0\" TYPE=\"part\" PKNAME=\"/dev/vda\" NAME=\"/dev/vda2\" KNAME=\"/dev/vda2\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:03.177164 D | exec: Running command: udevadm info --query=property /dev/vda2
+2024-06-23 08:39:03.190471 D | sys: udevadm info output: "DEVNAME=/dev/vda2\nDEVPATH=/devices/pci0000:00/0000:00:02.3/0000:04:00.0/virtio2/block/vda/vda2\nDEVTYPE=partition\nDISKSEQ=9\nMAJOR=253\nMINOR=2\nPARTN=2\nSUBSYSTEM=block"
+2024-06-23 08:39:03.190532 D | exec: Running command: lsblk /dev/vda3 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.198316 D | sys: lsblk output: "SIZE=\"271601106944\" ROTA=\"1\" RO=\"0\" TYPE=\"part\" PKNAME=\"/dev/vda\" NAME=\"/dev/vda3\" KNAME=\"/dev/vda3\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:03.198378 D | exec: Running command: udevadm info --query=property /dev/vda3
+2024-06-23 08:39:03.207753 D | sys: udevadm info output: "DEVNAME=/dev/vda3\nDEVPATH=/devices/pci0000:00/0000:00:02.3/0000:04:00.0/virtio2/block/vda/vda3\nDEVTYPE=partition\nDISKSEQ=9\nMAJOR=253\nMINOR=3\nPARTN=3\nSUBSYSTEM=block"
+2024-06-23 08:39:03.207805 D | exec: Running command: lsblk /dev/nvme1n1 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.212882 D | sys: lsblk output: "SIZE=\"3840755982336\" ROTA=\"0\" RO=\"0\" TYPE=\"disk\" PKNAME=\"\" NAME=\"/dev/nvme1n1\" KNAME=\"/dev/nvme1n1\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:03.212948 D | exec: Running command: sgdisk --print /dev/nvme1n1
+2024-06-23 08:39:03.216387 D | exec: Running command: udevadm info --query=property /dev/nvme1n1
+2024-06-23 08:39:03.223569 D | sys: udevadm info output: "DEVNAME=/dev/nvme1n1\nDEVPATH=/devices/pci0000:00/0000:00:02.5/0000:06:00.0/nvme/nvme1/nvme1n1\nDEVTYPE=disk\nDISKSEQ=11\nMAJOR=259\nMINOR=0\nSUBSYSTEM=block"
+2024-06-23 08:39:03.223686 D | exec: Running command: lsblk --noheadings --path --list --output NAME /dev/nvme1n1
+2024-06-23 08:39:03.226368 D | exec: Running command: lsblk /dev/nvme3n1 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.235567 D | sys: lsblk output: "SIZE=\"3840755982336\" ROTA=\"0\" RO=\"0\" TYPE=\"disk\" PKNAME=\"\" NAME=\"/dev/nvme3n1\" KNAME=\"/dev/nvme3n1\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:03.235735 D | exec: Running command: sgdisk --print /dev/nvme3n1
+2024-06-23 08:39:03.241338 D | exec: Running command: udevadm info --query=property /dev/nvme3n1
+2024-06-23 08:39:03.252863 D | sys: udevadm info output: "DEVNAME=/dev/nvme3n1\nDEVPATH=/devices/virtual/nvme-subsystem/nvme-subsys3/nvme3n1\nDEVTYPE=disk\nDISKSEQ=25\nMAJOR=259\nMINOR=2\nSUBSYSTEM=block"
+2024-06-23 08:39:03.252965 D | exec: Running command: lsblk --noheadings --path --list --output NAME /dev/nvme3n1
+2024-06-23 08:39:03.254942 D | exec: Running command: lsblk /dev/nvme0n1 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.263355 D | sys: lsblk output: "SIZE=\"3840755982336\" ROTA=\"0\" RO=\"0\" TYPE=\"disk\" PKNAME=\"\" NAME=\"/dev/nvme0n1\" KNAME=\"/dev/nvme0n1\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:03.263436 D | exec: Running command: sgdisk --print /dev/nvme0n1
+2024-06-23 08:39:03.265564 D | exec: Running command: udevadm info --query=property /dev/nvme0n1
+2024-06-23 08:39:03.277210 D | sys: udevadm info output: "DEVNAME=/dev/nvme0n1\nDEVPATH=/devices/pci0000:00/0000:00:02.4/0000:05:00.0/nvme/nvme0/nvme0n1\nDEVTYPE=disk\nDISKSEQ=12\nMAJOR=259\nMINOR=3\nSUBSYSTEM=block"
+2024-06-23 08:39:03.277250 D | exec: Running command: lsblk --noheadings --path --list --output NAME /dev/nvme0n1
+2024-06-23 08:39:03.278951 D | exec: Running command: lsblk /dev/nvme2n1 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.281970 D | sys: lsblk output: "SIZE=\"3840755982336\" ROTA=\"0\" RO=\"0\" TYPE=\"disk\" PKNAME=\"\" NAME=\"/dev/nvme2n1\" KNAME=\"/dev/nvme2n1\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:03.282027 D | exec: Running command: sgdisk --print /dev/nvme2n1
+2024-06-23 08:39:03.287145 D | exec: Running command: udevadm info --query=property /dev/nvme2n1
+2024-06-23 08:39:03.298935 D | sys: udevadm info output: "DEVNAME=/dev/nvme2n1\nDEVPATH=/devices/pci0000:00/0000:00:02.6/0000:07:00.0/nvme/nvme2/nvme2n1\nDEVTYPE=disk\nDISKSEQ=13\nMAJOR=259\nMINOR=6\nSUBSYSTEM=block"
+2024-06-23 08:39:03.299021 D | exec: Running command: lsblk --noheadings --path --list --output NAME /dev/nvme2n1
+2024-06-23 08:39:03.304364 D | exec: Running command: lsblk /dev/nbd8 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.308500 E | sys: failed to execute lsblk. output: .
+2024-06-23 08:39:03.308517 W | inventory: skipping device "nbd8". exit status 32
+2024-06-23 08:39:03.308530 D | exec: Running command: lsblk /dev/nbd9 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.312099 E | sys: failed to execute lsblk. output: .
+2024-06-23 08:39:03.312110 W | inventory: skipping device "nbd9". exit status 32
+2024-06-23 08:39:03.312115 D | exec: Running command: lsblk /dev/nbd10 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.316531 E | sys: failed to execute lsblk. output: .
+2024-06-23 08:39:03.316542 W | inventory: skipping device "nbd10". exit status 32
+2024-06-23 08:39:03.316547 D | exec: Running command: lsblk /dev/nbd11 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.318354 E | sys: failed to execute lsblk. output: .
+2024-06-23 08:39:03.318454 W | inventory: skipping device "nbd11". exit status 32
+2024-06-23 08:39:03.318513 D | exec: Running command: lsblk /dev/nbd12 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.325187 E | sys: failed to execute lsblk. output: .
+2024-06-23 08:39:03.325200 W | inventory: skipping device "nbd12". exit status 32
+2024-06-23 08:39:03.325205 D | exec: Running command: lsblk /dev/nbd13 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.326729 E | sys: failed to execute lsblk. output: .
+2024-06-23 08:39:03.326741 W | inventory: skipping device "nbd13". exit status 32
+2024-06-23 08:39:03.326747 D | exec: Running command: lsblk /dev/nbd14 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.328366 E | sys: failed to execute lsblk. output: .
+2024-06-23 08:39:03.328397 W | inventory: skipping device "nbd14". exit status 32
+2024-06-23 08:39:03.328411 D | exec: Running command: lsblk /dev/nbd15 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.330149 E | sys: failed to execute lsblk. output: .
+2024-06-23 08:39:03.330174 W | inventory: skipping device "nbd15". exit status 32
+2024-06-23 08:39:03.330179 D | inventory: discovered disks are:
+2024-06-23 08:39:03.330246 D | inventory: &{Name:vda1 Parent:vda HasChildren:false DevLinks: Size:1127219200 UUID: Serial: Type:part Rotational:true Readonly:false Partitions:[] Filesystem: Mountpoint: Vendor: Model: WWN: WWNVendorExtension: Empty:false CephVolumeData: RealPath:/dev/vda1 KernelName:vda1 Encrypted:false}
+2024-06-23 08:39:03.330332 D | inventory: &{Name:vda2 Parent:vda HasChildren:false DevLinks: Size:2147483648 UUID: Serial: Type:part Rotational:true Readonly:false Partitions:[] Filesystem: Mountpoint: Vendor: Model: WWN: WWNVendorExtension: Empty:false CephVolumeData: RealPath:/dev/vda2 KernelName:vda2 Encrypted:false}
+2024-06-23 08:39:03.330373 D | inventory: &{Name:vda3 Parent:vda HasChildren:false DevLinks: Size:271601106944 UUID: Serial: Type:part Rotational:true Readonly:false Partitions:[] Filesystem: Mountpoint: Vendor: Model: WWN: WWNVendorExtension: Empty:false CephVolumeData: RealPath:/dev/vda3 KernelName:vda3 Encrypted:false}
+2024-06-23 08:39:03.330436 D | inventory: &{Name:nvme1n1 Parent: HasChildren:false DevLinks: Size:3840755982336 UUID:4efc5515-3137-42a4-8c8d-6b4fdaa4198a Serial: Type:disk Rotational:false Readonly:false Partitions:[] Filesystem: Mountpoint: Vendor: Model: WWN: WWNVendorExtension: Empty:false CephVolumeData: RealPath:/dev/nvme1n1 KernelName:nvme1n1 Encrypted:false}
+2024-06-23 08:39:03.330486 D | inventory: &{Name:nvme3n1 Parent: HasChildren:false DevLinks: Size:3840755982336 UUID:10119d47-8dde-4bd5-8349-ee1531b4fb4b Serial: Type:disk Rotational:false Readonly:false Partitions:[] Filesystem: Mountpoint: Vendor: Model: WWN: WWNVendorExtension: Empty:false CephVolumeData: RealPath:/dev/nvme3n1 KernelName:nvme3n1 Encrypted:false}
+2024-06-23 08:39:03.330555 D | inventory: &{Name:nvme0n1 Parent: HasChildren:false DevLinks: Size:3840755982336 UUID:30dcf048-43ad-44a9-b1ae-1ed92b129b12 Serial: Type:disk Rotational:false Readonly:false Partitions:[] Filesystem: Mountpoint: Vendor: Model: WWN: WWNVendorExtension: Empty:false CephVolumeData: RealPath:/dev/nvme0n1 KernelName:nvme0n1 Encrypted:false}
+2024-06-23 08:39:03.330581 D | inventory: &{Name:nvme2n1 Parent: HasChildren:false DevLinks: Size:3840755982336 UUID:e2c564e0-4474-45f4-bdec-324cd6b2aa59 Serial: Type:disk Rotational:false Readonly:false Partitions:[] Filesystem: Mountpoint: Vendor: Model: WWN: WWNVendorExtension: Empty:false CephVolumeData: RealPath:/dev/nvme2n1 KernelName:nvme2n1 Encrypted:false}
+2024-06-23 08:39:03.330587 I | cephosd: creating and starting the osds
+2024-06-23 08:39:03.330648 D | cephosd: desiredDevices are [{Name:/dev/nvme0n1 OSDsPerDevice:1 MetadataDevice: DatabaseSizeMB:0 DeviceClass: InitialWeight: IsFilter:false IsDevicePathFilter:false} {Name:/dev/nvme1n1 OSDsPerDevice:1 MetadataDevice: DatabaseSizeMB:0 DeviceClass: InitialWeight: IsFilter:false IsDevicePathFilter:false}]
+2024-06-23 08:39:03.330662 D | cephosd: context.Devices are:
+2024-06-23 08:39:03.330679 D | cephosd: &{Name:vda1 Parent:vda HasChildren:false DevLinks: Size:1127219200 UUID: Serial: Type:part Rotational:true Readonly:false Partitions:[] Filesystem: Mountpoint: Vendor: Model: WWN: WWNVendorExtension: Empty:false CephVolumeData: RealPath:/dev/vda1 KernelName:vda1 Encrypted:false}
+2024-06-23 08:39:03.330781 D | cephosd: &{Name:vda2 Parent:vda HasChildren:false DevLinks: Size:2147483648 UUID: Serial: Type:part Rotational:true Readonly:false Partitions:[] Filesystem: Mountpoint: Vendor: Model: WWN: WWNVendorExtension: Empty:false CephVolumeData: RealPath:/dev/vda2 KernelName:vda2 Encrypted:false}
+2024-06-23 08:39:03.330852 D | cephosd: &{Name:vda3 Parent:vda HasChildren:false DevLinks: Size:271601106944 UUID: Serial: Type:part Rotational:true Readonly:false Partitions:[] Filesystem: Mountpoint: Vendor: Model: WWN: WWNVendorExtension: Empty:false CephVolumeData: RealPath:/dev/vda3 KernelName:vda3 Encrypted:false}
+2024-06-23 08:39:03.330953 D | cephosd: &{Name:nvme1n1 Parent: HasChildren:false DevLinks: Size:3840755982336 UUID:4efc5515-3137-42a4-8c8d-6b4fdaa4198a Serial: Type:disk Rotational:false Readonly:false Partitions:[] Filesystem: Mountpoint: Vendor: Model: WWN: WWNVendorExtension: Empty:false CephVolumeData: RealPath:/dev/nvme1n1 KernelName:nvme1n1 Encrypted:false}
+2024-06-23 08:39:03.331018 D | cephosd: &{Name:nvme3n1 Parent: HasChildren:false DevLinks: Size:3840755982336 UUID:10119d47-8dde-4bd5-8349-ee1531b4fb4b Serial: Type:disk Rotational:false Readonly:false Partitions:[] Filesystem: Mountpoint: Vendor: Model: WWN: WWNVendorExtension: Empty:false CephVolumeData: RealPath:/dev/nvme3n1 KernelName:nvme3n1 Encrypted:false}
+2024-06-23 08:39:03.331103 D | cephosd: &{Name:nvme0n1 Parent: HasChildren:false DevLinks: Size:3840755982336 UUID:30dcf048-43ad-44a9-b1ae-1ed92b129b12 Serial: Type:disk Rotational:false Readonly:false Partitions:[] Filesystem: Mountpoint: Vendor: Model: WWN: WWNVendorExtension: Empty:false CephVolumeData: RealPath:/dev/nvme0n1 KernelName:nvme0n1 Encrypted:false}
+2024-06-23 08:39:03.331164 D | cephosd: &{Name:nvme2n1 Parent: HasChildren:false DevLinks: Size:3840755982336 UUID:e2c564e0-4474-45f4-bdec-324cd6b2aa59 Serial: Type:disk Rotational:false Readonly:false Partitions:[] Filesystem: Mountpoint: Vendor: Model: WWN: WWNVendorExtension: Empty:false CephVolumeData: RealPath:/dev/nvme2n1 KernelName:nvme2n1 Encrypted:false}
+2024-06-23 08:39:03.331182 I | cephosd: old lsblk can't detect bluestore signature, so try to detect here
+2024-06-23 08:39:03.331271 D | exec: Running command: udevadm info --query=property /dev/vda1
+2024-06-23 08:39:03.336079 D | sys: udevadm info output: "DEVNAME=/dev/vda1\nDEVPATH=/devices/pci0000:00/0000:00:02.3/0000:04:00.0/virtio2/block/vda/vda1\nDEVTYPE=partition\nDISKSEQ=9\nMAJOR=253\nMINOR=1\nPARTN=1\nSUBSYSTEM=block"
+2024-06-23 08:39:03.336115 D | exec: Running command: lsblk /dev/vda1 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.344890 D | sys: lsblk output: "SIZE=\"1127219200\" ROTA=\"1\" RO=\"0\" TYPE=\"part\" PKNAME=\"/dev/vda\" NAME=\"/dev/vda1\" KNAME=\"/dev/vda1\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:03.344915 D | exec: Running command: ceph-volume inventory --format json /dev/vda1
+2024-06-23 08:39:03.775084 I | cephosd: skipping device "vda1": ["Insufficient space (<5GB)", "Has a FileSystem"].
+2024-06-23 08:39:03.775131 I | cephosd: old lsblk can't detect bluestore signature, so try to detect here
+2024-06-23 08:39:03.775228 D | exec: Running command: udevadm info --query=property /dev/vda2
+2024-06-23 08:39:03.790265 D | sys: udevadm info output: "DEVNAME=/dev/vda2\nDEVPATH=/devices/pci0000:00/0000:00:02.3/0000:04:00.0/virtio2/block/vda/vda2\nDEVTYPE=partition\nDISKSEQ=9\nMAJOR=253\nMINOR=2\nPARTN=2\nSUBSYSTEM=block"
+2024-06-23 08:39:03.790326 D | exec: Running command: lsblk /dev/vda2 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:03.800608 D | sys: lsblk output: "SIZE=\"2147483648\" ROTA=\"1\" RO=\"0\" TYPE=\"part\" PKNAME=\"/dev/vda\" NAME=\"/dev/vda2\" KNAME=\"/dev/vda2\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:03.800657 D | exec: Running command: ceph-volume inventory --format json /dev/vda2
+2024-06-23 08:39:04.171174 I | cephosd: skipping device "vda2": ["Has a FileSystem", "Insufficient space (<5GB)"].
+2024-06-23 08:39:04.171232 I | cephosd: old lsblk can't detect bluestore signature, so try to detect here
+2024-06-23 08:39:04.171360 D | exec: Running command: udevadm info --query=property /dev/vda3
+2024-06-23 08:39:04.186576 D | sys: udevadm info output: "DEVNAME=/dev/vda3\nDEVPATH=/devices/pci0000:00/0000:00:02.3/0000:04:00.0/virtio2/block/vda/vda3\nDEVTYPE=partition\nDISKSEQ=9\nMAJOR=253\nMINOR=3\nPARTN=3\nSUBSYSTEM=block"
+2024-06-23 08:39:04.186641 D | exec: Running command: lsblk /dev/vda3 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:04.190725 D | sys: lsblk output: "SIZE=\"271601106944\" ROTA=\"1\" RO=\"0\" TYPE=\"part\" PKNAME=\"/dev/vda\" NAME=\"/dev/vda3\" KNAME=\"/dev/vda3\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:04.190785 D | exec: Running command: ceph-volume inventory --format json /dev/vda3
+2024-06-23 08:39:04.549323 I | cephosd: skipping device "vda3": ["Has a FileSystem"].
+2024-06-23 08:39:04.549419 I | cephosd: old lsblk can't detect bluestore signature, so try to detect here
+2024-06-23 08:39:04.549518 I | cephosd: skipping device "nvme1n1", detected an existing OSD. UUID=53d7faa4-b35d-43e7-9829-b68fc062f099
+2024-06-23 08:39:04.549546 I | cephosd: old lsblk can't detect bluestore signature, so try to detect here
+2024-06-23 08:39:04.549594 I | cephosd: skipping device "nvme3n1", detected an existing OSD. UUID=e170c145-6676-491a-bbe0-e2971d6ceaf0
+2024-06-23 08:39:04.549625 I | cephosd: old lsblk can't detect bluestore signature, so try to detect here
+2024-06-23 08:39:04.549670 I | cephosd: skipping device "nvme0n1", detected an existing OSD. UUID=d0700591-7a8a-46d1-b027-b0610cedd2d3
+2024-06-23 08:39:04.549695 I | cephosd: old lsblk can't detect bluestore signature, so try to detect here
+2024-06-23 08:39:04.549746 I | cephosd: skipping device "nvme2n1", detected an existing OSD. UUID=f632b967-e93f-4196-b7da-2a78b8265bf3
+2024-06-23 08:39:04.560702 I | cephosd: configuring osd devices: {"Entries":{}}
+2024-06-23 08:39:04.560724 I | cephosd: no new devices to configure. returning devices already configured with ceph-volume.
+2024-06-23 08:39:04.560880 D | exec: Running command: stdbuf -oL ceph-volume --log-path /tmp/ceph-log lvm list  --format json
+2024-06-23 08:39:04.844894 D | cephosd: {}
+2024-06-23 08:39:04.844957 I | cephosd: 0 ceph-volume lvm osd devices configured on this node
+2024-06-23 08:39:04.844996 D | exec: Running command: stdbuf -oL ceph-volume --log-path /tmp/ceph-log raw list --format json
+2024-06-23 08:39:05.733384 D | cephosd: {
+    "53d7faa4-b35d-43e7-9829-b68fc062f099": {
+        "ceph_fsid": "e162cf6d-cd1f-4c9f-a49e-81d47f948fb4",
+        "device": "/dev/nvme1n1",
+        "osd_id": 0,
+        "osd_uuid": "53d7faa4-b35d-43e7-9829-b68fc062f099",
+        "type": "bluestore"
+    },
+    "d0700591-7a8a-46d1-b027-b0610cedd2d3": {
+        "ceph_fsid": "e162cf6d-cd1f-4c9f-a49e-81d47f948fb4",
+        "device": "/dev/nvme0n1",
+        "osd_id": 1,
+        "osd_uuid": "d0700591-7a8a-46d1-b027-b0610cedd2d3",
+        "type": "bluestore"
+    },
+    "e170c145-6676-491a-bbe0-e2971d6ceaf0": {
+        "ceph_fsid": "e162cf6d-cd1f-4c9f-a49e-81d47f948fb4",
+        "device": "/dev/nvme3n1",
+        "osd_id": 2,
+        "osd_uuid": "e170c145-6676-491a-bbe0-e2971d6ceaf0",
+        "type": "bluestore"
+    },
+    "f632b967-e93f-4196-b7da-2a78b8265bf3": {
+        "ceph_fsid": "e162cf6d-cd1f-4c9f-a49e-81d47f948fb4",
+        "device": "/dev/nvme2n1",
+        "osd_id": 3,
+        "osd_uuid": "f632b967-e93f-4196-b7da-2a78b8265bf3",
+        "type": "bluestore"
+    }
+}
+2024-06-23 08:39:05.733503 D | exec: Running command: lsblk /dev/nvme1n1 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:05.740372 D | sys: lsblk output: "SIZE=\"3840755982336\" ROTA=\"0\" RO=\"0\" TYPE=\"disk\" PKNAME=\"\" NAME=\"/dev/nvme1n1\" KNAME=\"/dev/nvme1n1\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:05.740503 D | exec: Running command: sgdisk --print /dev/nvme1n1
+2024-06-23 08:39:05.743157 I | cephosd: setting device class "nvme" for device "/dev/nvme1n1"
+2024-06-23 08:39:05.743221 D | exec: Running command: lsblk /dev/nvme0n1 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:05.747021 D | sys: lsblk output: "SIZE=\"3840755982336\" ROTA=\"0\" RO=\"0\" TYPE=\"disk\" PKNAME=\"\" NAME=\"/dev/nvme0n1\" KNAME=\"/dev/nvme0n1\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:05.747105 D | exec: Running command: sgdisk --print /dev/nvme0n1
+2024-06-23 08:39:05.750780 I | cephosd: setting device class "nvme" for device "/dev/nvme0n1"
+2024-06-23 08:39:05.751591 D | exec: Running command: lsblk /dev/nvme3n1 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:05.754570 D | sys: lsblk output: "SIZE=\"3840755982336\" ROTA=\"0\" RO=\"0\" TYPE=\"disk\" PKNAME=\"\" NAME=\"/dev/nvme3n1\" KNAME=\"/dev/nvme3n1\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:05.754682 D | exec: Running command: sgdisk --print /dev/nvme3n1
+2024-06-23 08:39:05.756748 I | cephosd: setting device class "nvme" for device "/dev/nvme3n1"
+2024-06-23 08:39:05.756763 D | exec: Running command: lsblk /dev/nvme2n1 --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-06-23 08:39:05.763978 D | sys: lsblk output: "SIZE=\"3840755982336\" ROTA=\"0\" RO=\"0\" TYPE=\"disk\" PKNAME=\"\" NAME=\"/dev/nvme2n1\" KNAME=\"/dev/nvme2n1\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-06-23 08:39:05.764007 D | exec: Running command: sgdisk --print /dev/nvme2n1
+2024-06-23 08:39:05.768241 I | cephosd: setting device class "nvme" for device "/dev/nvme2n1"
+2024-06-23 08:39:05.768253 I | cephosd: 4 ceph-volume raw osd devices configured on this node
+2024-06-23 08:39:05.768289 I | cephosd: devices = [{ID:0 Cluster:ceph UUID:53d7faa4-b35d-43e7-9829-b68fc062f099 DevicePartUUID: DeviceClass:nvme BlockPath:/dev/nvme1n1 MetadataPath: WalPath: SkipLVRelease:true Location:root=default host=minikube-m02 LVBackedPV:false CVMode:raw Store:bluestore TopologyAffinity: Encrypted:false ExportService:false NodeName: PVCName:} {ID:1 Cluster:ceph UUID:d0700591-7a8a-46d1-b027-b0610cedd2d3 DevicePartUUID: DeviceClass:nvme BlockPath:/dev/nvme0n1 MetadataPath: WalPath: SkipLVRelease:true Location:root=default host=minikube-m02 LVBackedPV:false CVMode:raw Store:bluestore TopologyAffinity: Encrypted:false ExportService:false NodeName: PVCName:} {ID:2 Cluster:ceph UUID:e170c145-6676-491a-bbe0-e2971d6ceaf0 DevicePartUUID: DeviceClass:nvme BlockPath:/dev/nvme3n1 MetadataPath: WalPath: SkipLVRelease:true Location:root=default host=minikube-m02 LVBackedPV:false CVMode:raw Store:bluestore TopologyAffinity: Encrypted:false ExportService:false NodeName: PVCName:} {ID:3 Cluster:ceph UUID:f632b967-e93f-4196-b7da-2a78b8265bf3 DevicePartUUID: DeviceClass:nvme BlockPath:/dev/nvme2n1 MetadataPath: WalPath: SkipLVRelease:true Location:root=default host=minikube-m02 LVBackedPV:false CVMode:raw Store:bluestore TopologyAffinity: Encrypted:false ExportService:false NodeName: PVCName:}]

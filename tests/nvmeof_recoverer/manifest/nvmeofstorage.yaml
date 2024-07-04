@@ -1,0 +1,19 @@
+apiVersion: ceph.rook.io/v1
+kind: NvmeOfStorage
+metadata:
+  name: nvmeofstorage-pbssd1
+  namespace: nvmeof-recoverer
+spec:
+  name: "pbssd1"
+  ip: "192.168.100.14"
+  devices:
+    - subnqn: "nqn.2023-01.com.samsung.semiconductor:fc641c65-2548-4788-961f-a7ebaab3dc6a:1.3.S63UNG0T619221"
+      port: 1153
+      attachedNode: "qemu1"
+      deviceName: "/dev/nvme2n1"
+      clusterName: nvmeof-recoverer
+    - subnqn: "nqn.2023-01.com.samsung.semiconductor:fc641c65-2548-4788-961f-a7ebaab3dc6a:1.5.S63UNG0T619219"
+      port: 1153
+      attachedNode: "qemu2"
+      deviceName: "/dev/nvme2n1"
+      clusterName: nvmeof-recoverer

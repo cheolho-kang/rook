@@ -231,13 +231,28 @@ spec:
   mon:
     count: ` + strconv.Itoa(m.settings.Mons) + `
     allowMultiplePerNode: true
-  storage:
+  storage:`
+		if len(m.settings.NodeDeviceMappings) > 0 {
+			clusterSpec += `
+    nodes:`
+			for node, devices := range m.settings.NodeDeviceMappings {
+				clusterSpec += `
+      - name: "` + node + `"
+        devices:`
+				for _, device := range devices {
+					clusterSpec += `
+          - name: "` + device + `"`
+				}
+			}
+		} else {
+			clusterSpec += `
     useAllNodes: ` + strconv.FormatBool(!m.settings.SkipOSDCreation) + `
     useAllDevices: ` + strconv.FormatBool(!m.settings.SkipOSDCreation) + `
     deviceFilter:  ` + getDeviceFilter() + `
     config:
       databaseSizeMB: "1024"
 `
+		}
 		// Append the storage settings if it's not an upgrade from 1.13 where the settings do not exist
 		if m.settings.RookVersion != Version1_13 {
 			clusterSpec += `

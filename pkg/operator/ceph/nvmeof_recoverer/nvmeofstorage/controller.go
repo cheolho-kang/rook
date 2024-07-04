@@ -180,7 +180,7 @@ func (r *ReconcileNvmeOfStorage) Reconcile(context context.Context, request reco
 		r.cleanupOSD(request.Namespace, deviceInfo)
 
 		// Connect the device to the new attachable host
-		newDeviceInfo := r.reassignFaultedOSDDevice(deviceInfo)
+		newDeviceInfo := r.reassignFaultedOSDDevice(request.Namespace, deviceInfo)
 
 		// Request the OSD to be transferred to the next host
 		err := r.updateCephClusterCR(request, deviceInfo, newDeviceInfo)
@@ -208,33 +208,32 @@ func (r *ReconcileNvmeOfStorage) reconstructCRUSHMap(context context.Context, na
 		// Find the osd id and cluster name for the fabric device listed in the nvmeofstorage CR
 		for _, pod := range pods.Items {
 			for _, envVar := range pod.Spec.Containers[0].Env {
-				if envVar.Name == "ROOK_BLOCK_PATH" && envVar.Value == device.DeviceName {
+				if pod.Spec.NodeName == device.AttachedNode && envVar.Name == "ROOK_BLOCK_PATH" && envVar.Value == device.DeviceName {
 					device.OsdID = pod.Labels["ceph-osd-id"]
 					clusterName = pod.Labels["app.kubernetes.io/part-of"]
-					break
+
+					// Update CRUSH map for OSD relocation to fabric failure domain
+					fabricHost := FabricFailureDomainPrefix + "-" + r.nvmeOfStorage.Spec.Name
+					clusterInfo := cephclient.AdminClusterInfo(context, namespace, clusterName)
+					cmd := []string{"osd", "crush", "move", "osd." + device.OsdID, "host=" + fabricHost}
+					exec := cephclient.NewCephCommand(r.context, clusterInfo, cmd)
+					exec.JsonOutput = true
+					buf, err := exec.Run()
+					if err != nil {
+						logger.Error(err, "Failed to move osd", "osdID", device.OsdID, "srcHost", device.AttachedNode,
+							"destHost", fabricHost, "result", string(buf))
+						panic(err)
+					}
+					logger.Debugf("Successfully updated CRUSH Map. osdID: %s, srcHost: %s, destHost: %s",
+						device.OsdID, device.AttachedNode, fabricHost)
+
+					// Update the AttachableHosts
+					err = r.clustermanager.AddAttachbleHost(device.AttachedNode)
+					if err != nil {
+						panic(err)
+					}
 				}
 			}
-		}
-
-		// Update CRUSH map for OSD relocation to fabric failure domain
-		fabricHost := FabricFailureDomainPrefix + "-" + r.nvmeOfStorage.Spec.Name
-		clusterInfo := cephclient.AdminClusterInfo(context, namespace, clusterName)
-		cmd := []string{"osd", "crush", "move", "osd." + device.OsdID, "host=" + fabricHost}
-		exec := cephclient.NewCephCommand(r.context, clusterInfo, cmd)
-		exec.JsonOutput = true
-		buf, err := exec.Run()
-		if err != nil {
-			logger.Error(err, "Failed to move osd", "osdID", device.OsdID, "srcHost", device.AttachedNode,
-				"destHost", fabricHost, "result", string(buf))
-			panic(err)
-		}
-		logger.Debugf("Successfully updated CRUSH Map. osdID: %s, srcHost: %s, destHost: %s",
-			device.OsdID, device.AttachedNode, fabricHost)
-
-		// Update the AttachableHosts
-		err = r.clustermanager.AddAttachbleHost(device.AttachedNode)
-		if err != nil {
-			panic(err)
 		}
 
 		// Update device endpoint map
@@ -273,14 +272,14 @@ func (r *ReconcileNvmeOfStorage) cleanupOSD(namespace string, deviceInfo cephv1.
 	}
 
 	// Disconnect the device used by this OSD
-	_, err = r.clustermanager.DisconnectOSDDevice(deviceInfo)
+	_, err = r.clustermanager.DisconnectOSDDevice(namespace, deviceInfo)
 	if err != nil {
 		panic(fmt.Sprintf("failed to disconnect OSD device with SubNQN %s: %v", deviceInfo.SubNQN, err))
 	}
 	logger.Debugf("successfully deleted the OSD deployment. Name: %q", osd.AppName+"-"+deviceInfo.OsdID)
 }
 
-func (r *ReconcileNvmeOfStorage) reassignFaultedOSDDevice(deviceInfo cephv1.FabricDevice) cephv1.FabricDevice {
+func (r *ReconcileNvmeOfStorage) reassignFaultedOSDDevice(namespace string, deviceInfo cephv1.FabricDevice) cephv1.FabricDevice {
 	nextHostName := r.clustermanager.GetNextAttachableHost(deviceInfo.AttachedNode)
 	if nextHostName == "" {
 		panic(fmt.Sprintf("no attachable hosts found for device with SubNQN %s on node %s",
@@ -288,13 +287,13 @@ func (r *ReconcileNvmeOfStorage) reassignFaultedOSDDevice(deviceInfo cephv1.Fabr
 	}
 
 	// Connect the device to the new host
-	output, err := r.clustermanager.ConnectOSDDeviceToHost(nextHostName, deviceInfo)
+	output, err := r.clustermanager.ConnectOSDDeviceToHost(namespace, nextHostName, deviceInfo)
 	if err != nil {
 		panic(fmt.Sprintf("failed to connect device with SubNQN %s to host %s: %v",
 			deviceInfo.SubNQN, nextHostName, err))
 	}
 	logger.Debugf("successfully reassigned the device. SubNQN: %s, DeviceName: %s, AttachedNode: %s",
-		deviceInfo.SubNQN, deviceInfo.DeviceName, deviceInfo.AttachedNode)
+		deviceInfo.SubNQN, deviceInfo.DeviceName, output.AttachedNode)
 
 	return output
 }
@@ -361,6 +360,7 @@ func isPodDead(oldPod *corev1.Pod, newPod *corev1.Pod) bool {
 	for _, cs := range newPod.Status.ContainerStatuses {
 		if cs.State.Waiting != nil && cs.State.Waiting.Reason == "CrashLoopBackOff" {
 			logger.Infof("OSD Pod %q is in CrashLoopBackOff, oldPod.Status.Phase: %s", namespacedName, oldPod.Status.Phase)
+			logger.Debug("!!label: ", newPod.Labels)
 			return true
 		}
 	}

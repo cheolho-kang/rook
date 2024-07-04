@@ -1,0 +1,23 @@
+apiVersion: v1
+data:
+  csi-cluster-config-json: '[{"clusterID":"rook-ceph","monitors":["10.43.11.253:6789"],"cephFS":{"netNamespaceFilePath":"","subvolumeGroup":"","kernelMountOptions":"","fuseMountOptions":""},"rbd":{"netNamespaceFilePath":"","radosNamespace":""},"nfs":{"netNamespaceFilePath":""},"readAffinity":{"enabled":false,"crushLocationLabels":null},"namespace":""}]'
+  data: a=10.43.11.253:6789
+  mapping: '{"node":{"a":{"Name":"qemu2","Hostname":"qemu2","Address":"192.168.100.12"}}}'
+  maxMonId: "0"
+  outOfQuorum: ""
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2024-06-04T05:33:43Z"
+  finalizers:
+  - ceph.rook.io/disaster-protection
+  name: rook-ceph-mon-endpoints
+  namespace: rook-ceph
+  ownerReferences:
+  - apiVersion: ceph.rook.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: CephCluster
+    name: my-cluster
+    uid: a158f004-37e9-46f4-b6e9-44f4de76e8bf
+  resourceVersion: "9180"
+  uid: 40859165-44bf-40e7-9155-e3ca4c9d5d8f

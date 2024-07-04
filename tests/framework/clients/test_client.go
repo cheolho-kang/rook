@@ -26,19 +26,20 @@ import (
 
 // TestClient is a wrapper for test client, containing interfaces for all rook operations
 type TestClient struct {
-	BlockClient        *BlockOperation
-	FSClient           *FilesystemOperation
-	NFSClient          *NFSOperation
-	ObjectClient       *ObjectOperation
-	ObjectUserClient   *ObjectUserOperation
-	PoolClient         *PoolOperation
-	BucketClient       *BucketOperation
-	UserClient         *ClientOperation
-	RBDMirrorClient    *RBDMirrorOperation
-	TopicClient        *TopicOperation
-	NotificationClient *NotificationOperation
-	COSIClient         *COSIOperation
-	k8sh               *utils.K8sHelper
+	BlockClient           *BlockOperation
+	FSClient              *FilesystemOperation
+	NFSClient             *NFSOperation
+	ObjectClient          *ObjectOperation
+	ObjectUserClient      *ObjectUserOperation
+	PoolClient            *PoolOperation
+	BucketClient          *BucketOperation
+	UserClient            *ClientOperation
+	RBDMirrorClient       *RBDMirrorOperation
+	TopicClient           *TopicOperation
+	NotificationClient    *NotificationOperation
+	COSIClient            *COSIOperation
+	// NvmeofRecovererClient *NvmeofRecovererOperation
+	k8sh                  *utils.K8sHelper
 }
 
 // CreateTestClient creates new instance of test client for a platform
@@ -56,6 +57,7 @@ func CreateTestClient(k8sHelper *utils.K8sHelper, manifests installer.CephManife
 		CreateTopicOperation(k8sHelper, manifests),
 		CreateNotificationOperation(k8sHelper, manifests),
 		CreateCOSIOperation(k8sHelper, manifests),
+		// CreateNvmeofRecovererOperation(k8sHelper, manifests),
 		k8sHelper,
 	}
 }

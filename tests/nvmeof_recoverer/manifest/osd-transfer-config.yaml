@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: osd-transfer-config
+  namespace: rook-ceph
+data:
+  config: '{"id":5,"faultDomain":"fabric-host-pbssd1","node":"qemu2"}'

@@ -34,18 +34,18 @@ import time
 
 
 def get_nvme_devices():
-	result = subprocess.run(['nvme', 'list', '-o', 'json'],
-							stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-	devices = json.loads(result.stdout)
-	devices = {device['DevicePath'] for device in devices['Devices']}
-	return devices
+    result = subprocess.run(['nvme', 'list', '-o', 'json'],
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    devices = json.loads(result.stdout)
+    devices = {device['DevicePath'] for device in devices['Devices']}
+    return devices
 
 def connect_nvme(subnqn, ip_address, port):
-	try:
-		devices_before = get_nvme_devices()
-		subprocess.run(['nvme', 'connect', '-t', 'tcp', '-n', subnqn,
-						'-a', ip_address, '-s', port], check=True)
-		time.sleep(1)
+    try:
+        devices_before = get_nvme_devices()
+        subprocess.run(['nvme', 'connect', '-t', 'tcp', '-n', subnqn,
+                        '-a', ip_address, '-s', port], check=True)
+        time.sleep(1)
     except subprocess.CalledProcessError as e:
         print('FAILED:', e)
     finally:
@@ -58,25 +58,23 @@ def connect_nvme(subnqn, ip_address, port):
             print('FAILED: No new devices connected.')
 
 def disconnect_nvme(subnqn):
-
-	try:
-		result = subprocess.run(['nvme', 'disconnect', '-n', subnqn],
-								stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		output = result.stdout.strip()
-		print(output)
-	except subprocess.CalledProcessError as e:
-		print('FAILED:', e)
+    try:
+        result = subprocess.run(['nvme', 'disconnect', '-n', subnqn],
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output = result.stdout.strip()
+        print(output)
+    except subprocess.CalledProcessError as e:
+        print('FAILED:', e)
 
 mode = "%s"
 address = "%s"
 port = "%s"
 subnqn = "%s"
 
-if mode and subnqn and address and port:
-    if mode == 'connect':
-        connect_nvme(subnqn, address, port)
-    elif mode == 'disconnect':
-        disconnect_nvme(subnqn)
+if mode == 'connect':
+    connect_nvme(subnqn, address, port)
+elif mode == 'disconnect':
+    disconnect_nvme(subnqn)
 `
 )
 
@@ -128,10 +126,10 @@ func (cm *ClusterManager) GetNextAttachableHost(currentHost string) string {
 	return ""
 }
 
-func (cm *ClusterManager) ConnectOSDDeviceToHost(targetHost string, fabricDeviceInfo cephv1.FabricDevice) (cephv1.FabricDevice, error) {
+func (cm *ClusterManager) ConnectOSDDeviceToHost(namespace, targetHost string, fabricDeviceInfo cephv1.FabricDevice) (cephv1.FabricDevice, error) {
 	output := *fabricDeviceInfo.DeepCopy()
 	connInfo := cm.NqnEndpointMap[fabricDeviceInfo.SubNQN]
-	newDevice, err := cm.runNvmeoFJob("connect", targetHost, connInfo.Address, connInfo.Port, fabricDeviceInfo.SubNQN)
+	newDevice, err := cm.runNvmeoFJob("connect", namespace, targetHost, connInfo.Address, connInfo.Port, fabricDeviceInfo.SubNQN)
 	if err == nil {
 		output.AttachedNode = targetHost
 		output.DeviceName = newDevice
@@ -139,16 +137,16 @@ func (cm *ClusterManager) ConnectOSDDeviceToHost(targetHost string, fabricDevice
 	return output, err
 }
 
-func (cm *ClusterManager) DisconnectOSDDevice(fabricDeviceInfo cephv1.FabricDevice) (string, error) {
-	return cm.runNvmeoFJob("disconnect", fabricDeviceInfo.AttachedNode, "", "", fabricDeviceInfo.SubNQN)
+func (cm *ClusterManager) DisconnectOSDDevice(namespace string, fabricDeviceInfo cephv1.FabricDevice) (string, error) {
+	return cm.runNvmeoFJob("disconnect", namespace, fabricDeviceInfo.AttachedNode, "", "", fabricDeviceInfo.SubNQN)
 }
 
-func (cm *ClusterManager) runNvmeoFJob(mode string, targetHost, address, port, subnqn string) (string, error) {
+func (cm *ClusterManager) runNvmeoFJob(mode, namespace, targetHost, address, port, subnqn string) (string, error) {
 	privileged := true
 	job := &batch.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "nvmeof-conn-control-job",
-			Namespace: "rook-ceph",
+			Namespace: namespace,
 		},
 		Spec: batch.JobSpec{
 			Template: v1.PodTemplateSpec{
@@ -220,5 +218,6 @@ func (cm *ClusterManager) runNvmeoFJob(mode string, targetHost, address, port, s
 		return "", errors.New(output)
 	}
 
+	logger.Debug("Successfully executed nvmeof connect/disconnect job. output: %s", output)
 	return output, nil
 }

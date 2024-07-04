@@ -1,0 +1,41 @@
+2024/05/30 05:57:31 maxprocs: Leaving GOMAXPROCS=8: CPU quota undefined
+2024-05-30 05:57:31.581963 I | cephcmd: desired devices to configure osds: [{Name:/dev/nvme2n1 OSDsPerDevice:1 MetadataDevice: DatabaseSizeMB:0 DeviceClass: InitialWeight: IsFilter:false IsDevicePathFilter:false}]
+2024-05-30 05:57:31.583184 I | rookcmd: starting Rook v1.13.0-alpha.0.407.ga536b363c with arguments '/rook/rook ceph osd provision'
+2024-05-30 05:57:31.583209 I | rookcmd: flag values: --cluster-id=d277742d-1e8e-422c-9fa9-9802b5354391, --cluster-name=my-cluster, --data-device-filter=, --data-device-path-filter=, --data-devices=[{"id":"/dev/nvme2n1","storeConfig":{"osdsPerDevice":1}}], --encrypted-device=false, --force-format=false, --help=false, --location=, --log-level=DEBUG, --metadata-device=, --node-name=minikube-m03, --osd-crush-device-class=, --osd-crush-initial-weight=, --osd-database-size=0, --osd-store-type=bluestore, --osd-wal-size=576, --osds-per-device=1, --pvc-backed-osd=false, --replace-osd=1
+2024-05-30 05:57:31.583214 I | ceph-spec: parsing mon endpoints: a=10.108.26.8:6789
+2024-05-30 05:57:31.595770 I | op-osd: CRUSH location=root=default host=minikube-m03
+2024-05-30 05:57:31.595797 I | cephcmd: crush location of osd: root=default host=minikube-m03
+2024-05-30 05:57:31.599351 D | cephclient: No ceph configuration override to merge as "rook-config-override" configmap is empty
+2024-05-30 05:57:31.599377 I | cephclient: writing config file /var/lib/rook/rook-ceph/rook-ceph.config
+2024-05-30 05:57:31.599507 I | cephclient: generated admin config in /var/lib/rook/rook-ceph
+2024-05-30 05:57:31.599695 D | cephclient: config file @ /etc/ceph/ceph.conf:
+[global]
+fsid                = 5492f07a-8123-4fdf-8ca4-da7baf747ef7
+mon initial members = a
+mon host            = [v2:10.108.26.8:3300,v1:10.108.26.8:6789]
+
+[client.admin]
+keyring = /var/lib/rook/rook-ceph/client.admin.keyring
+2024-05-30 05:57:31.599702 I | cephcmd: destroying osd.1 and cleaning its backing device
+2024-05-30 05:57:31.599881 D | exec: Running command: stdbuf -oL ceph-volume --log-path /tmp/ceph-log lvm list  --format json
+2024-05-30 05:57:31.939397 D | cephosd: {}
+2024-05-30 05:57:31.939448 I | cephosd: 0 ceph-volume lvm osd devices configured on this node
+2024-05-30 05:57:31.939476 D | exec: Running command: stdbuf -oL ceph-volume --log-path /tmp/ceph-log raw list --format json
+2024-05-30 05:57:32.897926 D | cephosd: {
+    "07980ab9-2cb7-4388-a6e6-6336d0208402": {
+        "ceph_fsid": "5492f07a-8123-4fdf-8ca4-da7baf747ef7",
+        "device": "/dev/nvme0n1",
+        "osd_id": 2,
+        "osd_uuid": "07980ab9-2cb7-4388-a6e6-6336d0208402",
+        "type": "bluestore"
+    },
+    "aa65f01d-16e7-44ee-956f-7b67f7fb8914": {
+        "ceph_fsid": "5492f07a-8123-4fdf-8ca4-da7baf747ef7",
+        "device": "/dev/nvme1n1",
+        "osd_id": 0,
+        "osd_uuid": "aa65f01d-16e7-44ee-956f-7b67f7fb8914",
+        "type": "bluestore"
+    }
+}
+2024-05-30 05:57:32.898034 I | cephosd: 2 ceph-volume raw osd devices configured on this node
+2024-05-30 05:57:32.898138 C | rookcmd: failed to destroy OSD 1.: failed to get OSD info for OSD.1: failed to get details for OSD 1 using ceph-volume list

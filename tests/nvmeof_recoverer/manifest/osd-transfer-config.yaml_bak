@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: osd-transfer-config
+  namespace: rook-ceph
+data:
+  config: '{"id":0,"path":"/dev/nvme0n1p2","node":"minikube-m03"}'

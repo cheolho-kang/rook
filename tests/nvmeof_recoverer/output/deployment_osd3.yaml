@@ -1,0 +1,481 @@
+apiVersion: v1
+items:
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      banzaicloud.com/last-applied: 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
+      deployment.kubernetes.io/revision: "1"
+    creationTimestamp: "2024-05-28T13:23:45Z"
+    generation: 1
+    labels:
+      app: rook-ceph-osd
+      app.kubernetes.io/component: cephclusters.ceph.rook.io
+      app.kubernetes.io/created-by: rook-ceph-operator
+      app.kubernetes.io/instance: "3"
+      app.kubernetes.io/managed-by: rook-ceph-operator
+      app.kubernetes.io/name: ceph-osd
+      app.kubernetes.io/part-of: my-cluster
+      ceph-osd-id: "3"
+      ceph-version: 18.2.2-0
+      ceph_daemon_id: "3"
+      ceph_daemon_type: osd
+      device-class: nvme
+      failure-domain: minikube-m02
+      osd: "3"
+      osd-store: chkang0912
+      portable: "false"
+      rook-version: v1.14.0-alpha.0.129.gbd90e21c8-dirty
+      rook.io/operator-namespace: rook-ceph
+      rook_cluster: rook-ceph
+      topology-location-host: minikube-m02
+      topology-location-root: default
+    name: rook-ceph-osd-3
+    namespace: rook-ceph
+    ownerReferences:
+    - apiVersion: ceph.rook.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: CephCluster
+      name: my-cluster
+      uid: dffe8b61-91dc-4b7d-a308-21042c38dc4e
+    resourceVersion: "11925"
+    uid: 5963f47c-db62-474b-acc1-3b1b913c843c
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: rook-ceph-osd
+        ceph-osd-id: "3"
+        rook_cluster: rook-ceph
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: rook-ceph-osd
+          app.kubernetes.io/component: cephclusters.ceph.rook.io
+          app.kubernetes.io/created-by: rook-ceph-operator
+          app.kubernetes.io/instance: "3"
+          app.kubernetes.io/managed-by: rook-ceph-operator
+          app.kubernetes.io/name: ceph-osd
+          app.kubernetes.io/part-of: my-cluster
+          ceph-osd-id: "3"
+          ceph_daemon_id: "3"
+          ceph_daemon_type: osd
+          device-class: nvme
+          failure-domain: minikube-m02
+          osd: "3"
+          osd-store: bluestore
+          portable: "false"
+          rook.io/operator-namespace: rook-ceph
+          rook_cluster: rook-ceph
+          topology-location-host: minikube-m02
+          topology-location-root: default
+        name: rook-ceph-osd
+      spec:
+        affinity: {}
+        containers:
+        - command:
+          - /bin/sh
+          - -c
+          - mkdir -p /var/lib/ceph/osd/ceph-3 && mount /dev/nvme1n1p1 /var/lib/ceph/osd/ceph-3
+            && ceph-osd --foreground --id 3 --fsid 06aaf0a7-a10b-4181-a3f4-2775a02149ac
+            --setuser ceph --setgroup ceph --crush-location="root=default host=minikube-m02"
+            --default-log-to-stderr=true --default-err-to-stderr=true --default-mon-cluster-log-to-stderr=true
+            --default-log-stderr-prefix=debug  --default-log-to-file=false --default-mon-cluster-log-to-file=false
+            --ms-learn-addr-from-peer=false
+          env:
+          - name: ROOK_NODE_NAME
+            value: minikube-m02
+          - name: ROOK_CLUSTER_ID
+            value: dffe8b61-91dc-4b7d-a308-21042c38dc4e
+          - name: ROOK_CLUSTER_NAME
+            value: my-cluster
+          - name: ROOK_PRIVATE_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          - name: ROOK_PUBLIC_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          - name: POD_NAMESPACE
+            value: rook-ceph
+          - name: ROOK_MON_ENDPOINTS
+            valueFrom:
+              configMapKeyRef:
+                key: data
+                name: rook-ceph-mon-endpoints
+          - name: ROOK_CONFIG_DIR
+            value: /var/lib/rook
+          - name: ROOK_CEPH_CONFIG_OVERRIDE
+            value: /etc/rook/config/override.conf
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: spec.nodeName
+          - name: ROOK_CRUSHMAP_ROOT
+            value: default
+          - name: ROOK_CRUSHMAP_HOSTNAME
+            value: minikube-m02
+          - name: CEPH_VOLUME_DEBUG
+            value: "1"
+          - name: CEPH_VOLUME_SKIP_RESTORECON
+            value: "1"
+          - name: DM_DISABLE_UDEV
+            value: "1"
+          - name: ROOK_OSDS_PER_DEVICE
+            value: "1"
+          - name: CONTAINER_IMAGE
+            value: quay.io/ceph/ceph:v18
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: POD_MEMORY_LIMIT
+            valueFrom:
+              resourceFieldRef:
+                divisor: "0"
+                resource: limits.memory
+          - name: POD_MEMORY_REQUEST
+            valueFrom:
+              resourceFieldRef:
+                divisor: "0"
+                resource: requests.memory
+          - name: POD_CPU_LIMIT
+            valueFrom:
+              resourceFieldRef:
+                divisor: "1"
+                resource: limits.cpu
+          - name: POD_CPU_REQUEST
+            valueFrom:
+              resourceFieldRef:
+                divisor: "0"
+                resource: requests.cpu
+          - name: CEPH_USE_RANDOM_NONCE
+            value: "true"
+          - name: ROOK_OSD_RESTART_INTERVAL
+            value: "0"
+          - name: ROOK_OSD_UUID
+            value: bf06f4f7-b1ef-44fa-98c3-64b5d459e72a
+          - name: ROOK_OSD_ID
+            value: "3"
+          - name: ROOK_CEPH_MON_HOST
+            valueFrom:
+              secretKeyRef:
+                key: mon_host
+                name: rook-ceph-config
+          - name: CEPH_ARGS
+            value: -m $(ROOK_CEPH_MON_HOST)
+          - name: ROOK_BLOCK_PATH
+            value: /dev/nvme1n1p2
+          - name: ROOK_CV_MODE
+            value: raw
+          - name: ROOK_OSD_DEVICE_CLASS
+            value: nvme
+          - name: ROOK_POD_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          envFrom:
+          - configMapRef:
+              name: rook-ceph-osd-env-override
+              optional: true
+          image: quay.io/ceph/ceph:v18
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            exec:
+              command:
+              - env
+              - -i
+              - sh
+              - -c
+              - "\noutp=\"$(ceph --admin-daemon /run/ceph/ceph-osd.3.asok status 2>&1)\"\nrc=$?\nif
+                [ $rc -ne 0 ] && [ ! -f /tmp/osd-sleep ]; then\n\techo \"ceph daemon
+                health check failed with the following output:\"\n\techo \"$outp\"
+                | sed -e 's/^/> /g'\n\texit $rc\nfi\n"
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: osd
+          resources: {}
+          securityContext:
+            privileged: true
+            readOnlyRootFilesystem: false
+            runAsUser: 0
+          startupProbe:
+            exec:
+              command:
+              - env
+              - -i
+              - sh
+              - -c
+              - "\noutp=\"$(ceph --admin-daemon /run/ceph/ceph-osd.3.asok status 2>&1)\"\nrc=$?\nif
+                [ $rc -ne 0 ] && [ ! -f /tmp/osd-sleep ]; then\n\techo \"ceph daemon
+                health check failed with the following output:\"\n\techo \"$outp\"
+                | sed -e 's/^/> /g'\n\texit $rc\nfi\n"
+            failureThreshold: 720
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /var/lib/rook
+            name: rook-data
+          - mountPath: /etc/ceph
+            name: rook-config-override
+            readOnly: true
+          - mountPath: /run/ceph
+            name: ceph-daemons-sock-dir
+          - mountPath: /var/log/ceph
+            name: rook-ceph-log
+          - mountPath: /var/lib/ceph/crash
+            name: rook-ceph-crash
+          - mountPath: /dev
+            name: devices
+          - mountPath: /run/udev
+            name: run-udev
+          - mountPath: /tmp/ceph-activate
+            name: activate-osd
+          workingDir: /var/log/ceph
+        dnsPolicy: ClusterFirst
+        initContainers:
+        - command:
+          - /bin/bash
+          - -c
+          - "mkdir -p /var/lib/ceph/osd/ceph-3 && mount /dev/nvme1n1p1 /var/lib/ceph/osd/ceph-3
+            && \nset -o errexit\nset -o pipefail\nset -o nounset # fail if variables
+            are unset\nset -o xtrace\n\nOSD_ID=\"$ROOK_OSD_ID\"\nCEPH_FSID=06aaf0a7-a10b-4181-a3f4-2775a02149ac\nOSD_UUID=bf06f4f7-b1ef-44fa-98c3-64b5d459e72a\nOSD_STORE_FLAG=\"--bluestore\"\nOSD_DATA_DIR=/var/lib/ceph/osd/ceph-\"$OSD_ID\"\nCV_MODE=raw\nDEVICE=\"$ROOK_BLOCK_PATH\"\n\n#
+            \"ceph.conf\" must have the \"fsid\" global configuration to activate
+            encrypted OSDs\n# after the following Ceph's PR is merged.\n# https://github.com/ceph/ceph/commit/25655e5a8829e001adf467511a6bde8142b0a575\n#
+            This limitation will be removed later. After that, we can remove this\n#
+            fsid injection code. Probably a good time is when to remove Quincy support.\n#
+            https://github.com/rook/rook/pull/10333#discussion_r892817877\ncp --no-preserve=mode
+            /etc/temp-ceph/ceph.conf /etc/ceph/ceph.conf\npython3 -c \"\nimport configparser\n\nconfig
+            = configparser.ConfigParser()\nconfig.read('/etc/ceph/ceph.conf')\n\nif
+            not config.has_section('global'):\n    config['global'] = {}\n\nif not
+            config.has_option('global','fsid'):\n    config['global']['fsid'] = '$CEPH_FSID'\n\nwith
+            open('/etc/ceph/ceph.conf', 'w') as configfile:\n    config.write(configfile)\n\"\n\n#
+            create new keyring\nceph -n client.admin auth get-or-create osd.\"$OSD_ID\"
+            mon 'allow profile osd' mgr 'allow profile osd' osd 'allow *' -k /etc/ceph/admin-keyring-store/keyring\n\n#
+            active the osd with ceph-volume\nif [[ \"$CV_MODE\" == \"lvm\" ]]; then\n\tTMP_DIR=$(mktemp
+            -d)\n\n\t# activate osd\n\tceph-volume lvm activate --no-systemd \"$OSD_STORE_FLAG\"
+            \"$OSD_ID\" \"$OSD_UUID\"\n\n\t# copy the tmpfs directory to a temporary
+            directory\n\t# this is needed because when the init container exits, the
+            tmpfs goes away and its content with it\n\t# this will result in the emptydir
+            to be empty when accessed by the main osd container\n\tcp --verbose --no-dereference
+            \"$OSD_DATA_DIR\"/* \"$TMP_DIR\"/\n\n\t# unmount the tmpfs since we don't
+            need it anymore\n\tumount \"$OSD_DATA_DIR\"\n\n\t# copy back the content
+            of the tmpfs into the original osd directory\n\tcp --verbose --no-dereference
+            \"$TMP_DIR\"/* \"$OSD_DATA_DIR\"\n\n\t# retain ownership of files to the
+            ceph user/group\n\tchown --verbose --recursive ceph:ceph \"$OSD_DATA_DIR\"\n\n\t#
+            remove the temporary directory\n\trm --recursive --force \"$TMP_DIR\"\nelse\n\t#
+            'ceph-volume raw list' (which the osd-prepare job uses to report OSDs
+            on nodes)\n\t#  returns user-friendly device names which can change when
+            systems reboot. To\n\t# keep OSD pods from crashing repeatedly after a
+            reboot, we need to check if the\n\t# block device we have is still correct,
+            and if it isn't correct, we need to\n\t# scan all the disks to find the
+            right one.\n\tOSD_LIST=\"$(mktemp)\"\n\n\tfunction find_device() {\n\t\t#
+            jq would be preferable, but might be removed for hardened Ceph images\n\t\t#
+            python3 should exist in all containers having Ceph\n\t\tpython3 -c \"\nimport
+            sys, json\nfor _, info in json.load(sys.stdin).items():\n\tif info['osd_id']
+            == $OSD_ID:\n\t\tprint(info['device'], end='')\n\t\tprint('found device:
+            ' + info['device'], file=sys.stderr) # log the disk we found to stderr\n\t\tsys.exit(0)
+            \ # don't keep processing once the disk is found\nsys.exit('no disk found
+            with OSD ID $OSD_ID')\n\"\n\t}\n\n\tceph-volume raw list \"$DEVICE\" >
+            \"$OSD_LIST\"\n\tcat \"$OSD_LIST\"\n\n\tif ! find_device < \"$OSD_LIST\";
+            then\n\t\tceph-volume raw list > \"$OSD_LIST\"\n\t\tcat \"$OSD_LIST\"\n\n\t\tDEVICE=\"$(find_device
+            < \"$OSD_LIST\")\"\n\tfi\n\t[[ -z \"$DEVICE\" ]] && { echo \"no device\"
+            ; exit 1 ; }\n\n\t# If a kernel device name change happens and a block
+            device file\n\t# in the OSD directory becomes missing, this OSD fails
+            to start\n\t# continuously. This problem can be resolved by confirming\n\t#
+            the validity of the device file and recreating it if necessary.\n\tOSD_BLOCK_PATH=/var/lib/ceph/osd/ceph-$OSD_ID/block\n\tif
+            [ -L $OSD_BLOCK_PATH -a \"$(readlink $OSD_BLOCK_PATH)\" != $DEVICE ] ;
+            then\n\t\trm $OSD_BLOCK_PATH\n\tfi\n\n\t# ceph-volume raw mode only supports
+            bluestore so we don't need to pass a store flag\n\tceph-volume raw activate
+            --device \"$DEVICE\" --no-systemd --no-tmpfs\nfi\n"
+          env:
+          - name: CEPH_VOLUME_DEBUG
+            value: "1"
+          - name: CEPH_VOLUME_SKIP_RESTORECON
+            value: "1"
+          - name: DM_DISABLE_UDEV
+            value: "1"
+          - name: ROOK_CEPH_MON_HOST
+            valueFrom:
+              secretKeyRef:
+                key: mon_host
+                name: rook-ceph-config
+          - name: CEPH_ARGS
+            value: -m $(ROOK_CEPH_MON_HOST)
+          - name: ROOK_BLOCK_PATH
+            value: /dev/nvme1n1p2
+          - name: ROOK_METADATA_DEVICE
+          - name: ROOK_WAL_DEVICE
+          - name: ROOK_OSD_ID
+            value: "3"
+          envFrom:
+          - configMapRef:
+              name: rook-ceph-osd-env-override
+              optional: true
+          image: quay.io/ceph/ceph:v18
+          imagePullPolicy: IfNotPresent
+          name: activate
+          resources: {}
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /tmp/ceph-activate
+            name: activate-osd
+          - mountPath: /dev
+            name: devices
+          - mountPath: /etc/temp-ceph
+            name: rook-config-override
+            readOnly: true
+          - mountPath: /etc/ceph/admin-keyring-store/
+            name: rook-ceph-admin-keyring
+            readOnly: true
+        - command:
+          - /bin/sh
+          - -c
+          - mkdir -p /var/lib/ceph/osd/ceph-3 && mount /dev/nvme1n1p1 /var/lib/ceph/osd/ceph-3
+            && ceph-bluestore-tool bluefs-bdev-expand --path /var/lib/ceph/osd/ceph-3
+          image: quay.io/ceph/ceph:v18
+          imagePullPolicy: IfNotPresent
+          name: expand-bluefs
+          resources: {}
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /dev
+            name: devices
+        - args:
+          - --verbose
+          - --recursive
+          - ceph:ceph
+          - /var/log/ceph
+          - /var/lib/ceph/crash
+          - /run/ceph
+          command:
+          - chown
+          image: quay.io/ceph/ceph:v18
+          imagePullPolicy: IfNotPresent
+          name: chown-container-data-dir
+          resources: {}
+          securityContext:
+            privileged: true
+            readOnlyRootFilesystem: false
+            runAsUser: 0
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /var/lib/rook
+            name: rook-data
+          - mountPath: /etc/ceph
+            name: rook-config-override
+            readOnly: true
+          - mountPath: /run/ceph
+            name: ceph-daemons-sock-dir
+          - mountPath: /var/log/ceph
+            name: rook-ceph-log
+          - mountPath: /var/lib/ceph/crash
+            name: rook-ceph-crash
+          - mountPath: /dev
+            name: devices
+          - mountPath: /run/udev
+            name: run-udev
+          - mountPath: /tmp/ceph-activate
+            name: activate-osd
+        nodeSelector:
+          kubernetes.io/hostname: minikube-m02
+        priorityClassName: system-node-critical
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        serviceAccount: rook-ceph-osd
+        serviceAccountName: rook-ceph-osd
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - hostPath:
+            path: /var/lib/rook
+            type: ""
+          name: rook-data
+        - name: rook-config-override
+          projected:
+            defaultMode: 420
+            sources:
+            - configMap:
+                items:
+                - key: config
+                  mode: 292
+                  path: ceph.conf
+                name: rook-config-override
+        - hostPath:
+            path: /var/lib/rook/exporter
+            type: DirectoryOrCreate
+          name: ceph-daemons-sock-dir
+        - hostPath:
+            path: /var/lib/rook/rook-ceph/log
+            type: ""
+          name: rook-ceph-log
+        - hostPath:
+            path: /var/lib/rook/rook-ceph/crash
+            type: ""
+          name: rook-ceph-crash
+        - hostPath:
+            path: /dev
+            type: ""
+          name: devices
+        - hostPath:
+            path: /run/udev
+            type: ""
+          name: run-udev
+        - hostPath:
+            path: /tmp/06aaf0a7-a10b-4181-a3f4-2775a02149ac_bf06f4f7-b1ef-44fa-98c3-64b5d459e72a
+            type: DirectoryOrCreate
+          name: activate-osd
+        - name: rook-ceph-admin-keyring
+          secret:
+            defaultMode: 420
+            secretName: rook-ceph-admin-keyring
+  status:
+    availableReplicas: 1
+    conditions:
+    - lastTransitionTime: "2024-05-28T13:24:06Z"
+      lastUpdateTime: "2024-05-28T13:24:06Z"
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    - lastTransitionTime: "2024-05-28T13:23:45Z"
+      lastUpdateTime: "2024-05-28T13:24:06Z"
+      message: ReplicaSet "rook-ceph-osd-3-7f6bdff95b" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: "True"
+      type: Progressing
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+    updatedReplicas: 1
+kind: List
+metadata:
+  resourceVersion: ""

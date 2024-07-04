@@ -1,0 +1,137 @@
+apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"ceph.rook.io/v1","kind":"CephCluster","metadata":{"annotations":{},"name":"my-cluster","namespace":"rook-ceph"},"spec":{"cephConfig":{"global":{"bdev_flock_retry":"20","bluefs_buffered_io":"false","mon_data_avail_warn":"10","mon_warn_on_pool_no_redundancy":"false","osd_pool_default_size":"1"}},"cephVersion":{"allowUnsupported":true,"image":"quay.io/ceph/ceph:v18"},"crashCollector":{"disable":true},"dashboard":{"enabled":true},"dataDirHostPath":"/var/lib/rook","disruptionManagement":{"managePodBudgets":true},"healthCheck":{"daemonHealth":{"mon":{"interval":"45s","timeout":"600s"}}},"mgr":{"allowMultiplePerNode":true,"count":1,"modules":[{"enabled":true,"name":"rook"}]},"mon":{"allowMultiplePerNode":true,"count":1},"monitoring":{"enabled":false},"priorityClassNames":{"all":"system-node-critical","mgr":"system-cluster-critical"},"storage":{"nodes":[{"devices":[{"name":"/dev/nvme0n1"},{"name":"/dev/nvme1n1"},{"name":"/dev/nvme2n1"}],"name":"qemu1"},{"devices":[{"name":"/dev/nvme0n1"},{"name":"/dev/nvme1n1"},{"name":"/dev/nvme2n1"}],"name":"qemu2"}],"useAllDevices":false,"useAllNodes":false}}}
+  creationTimestamp: "2024-06-05T07:54:26Z"
+  finalizers:
+  - cephcluster.ceph.rook.io
+  generation: 4
+  name: my-cluster
+  namespace: rook-ceph
+  resourceVersion: "14682"
+  uid: 86cbaa11-3a38-44d7-b989-c31b0b3cf421
+spec:
+  cephConfig:
+    global:
+      bdev_flock_retry: "20"
+      bluefs_buffered_io: "false"
+      mon_data_avail_warn: "10"
+      mon_warn_on_pool_no_redundancy: "false"
+      osd_pool_default_size: "1"
+  cephVersion:
+    allowUnsupported: true
+    image: quay.io/ceph/ceph:v18
+  cleanupPolicy:
+    sanitizeDisks: {}
+  crashCollector:
+    disable: true
+  csi:
+    cephfs: {}
+    readAffinity:
+      enabled: false
+  dashboard:
+    enabled: true
+  dataDirHostPath: /var/lib/rook
+  disruptionManagement:
+    managePodBudgets: true
+  external: {}
+  healthCheck:
+    daemonHealth:
+      mon:
+        interval: 45s
+        timeout: 600s
+      osd: {}
+      status: {}
+  logCollector: {}
+  mgr:
+    allowMultiplePerNode: true
+    count: 1
+    modules:
+    - enabled: true
+      name: rook
+  mon:
+    allowMultiplePerNode: true
+    count: 1
+  monitoring: {}
+  network:
+    multiClusterService: {}
+  priorityClassNames:
+    all: system-node-critical
+    mgr: system-cluster-critical
+  security:
+    keyRotation:
+      enabled: false
+    kms: {}
+  storage:
+    flappingRestartIntervalHours: 0
+    nodes:
+    - devices:
+      - name: /dev/nvme0n1
+      - name: /dev/nvme1n1
+      name: qemu1
+      resources: {}
+    - devices:
+      - name: /dev/nvme0n1
+      - name: /dev/nvme1n1
+      - name: /dev/nvme2n1
+      - name: /dev/nvme3n1
+      name: qemu2
+      resources: {}
+    store: {}
+    useAllDevices: false
+status:
+  ceph:
+    capacity:
+      bytesAvailable: 23044359794688
+      bytesTotal: 23044535894016
+      bytesUsed: 176099328
+      lastUpdated: "2024-06-05T08:01:45Z"
+    details:
+      OSD_DOWN:
+        message: 1 osds down
+        severity: HEALTH_WARN
+      OSD_FLAGS:
+        message: 1 OSDs or CRUSH {nodes, device-classes} have {NOUP,NODOWN,NOIN,NOOUT}
+          flags set
+        severity: HEALTH_WARN
+    fsid: e84efe97-4274-43c1-bca7-a9742903c566
+    health: HEALTH_WARN
+    lastChanged: "2024-06-05T08:01:45Z"
+    lastChecked: "2024-06-05T08:01:45Z"
+    previousHealth: HEALTH_OK
+    versions:
+      mgr:
+        ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable): 1
+      mon:
+        ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable): 1
+      osd:
+        ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable): 5
+      overall:
+        ceph version 18.2.2 (531c0d11a1c5d39fbfe6aa8a521f023abf3bf3e2) reef (stable): 7
+  conditions:
+  - lastHeartbeatTime: "2024-06-05T08:01:45Z"
+    lastTransitionTime: "2024-06-05T07:57:02Z"
+    message: Cluster created successfully
+    reason: ClusterCreated
+    status: "True"
+    type: Ready
+  - lastHeartbeatTime: "2024-06-05T08:02:26Z"
+    lastTransitionTime: "2024-06-05T08:02:26Z"
+    message: Processing OSD 4 on node "qemu2"
+    reason: ClusterProgressing
+    status: "True"
+    type: Progressing
+  message: Processing OSD 4 on node "qemu2"
+  phase: Progressing
+  state: Creating
+  storage:
+    deviceClasses:
+    - name: nvme
+    osd:
+      storeType:
+        bluestore: 6
+  version:
+    image: quay.io/ceph/ceph:v18
+    version: 18.2.2-0

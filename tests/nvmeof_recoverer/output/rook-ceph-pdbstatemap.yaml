@@ -1,0 +1,13 @@
+apiVersion: v1
+data:
+  draining-failure-domain: qemu1
+  draining-failure-domain-duration: "2024-06-04T05:41:29Z"
+  qemu1-noout-last-set-at: "2024-06-04T05:41:30Z"
+  set-no-out: "true"
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2024-06-04T05:33:00Z"
+  name: rook-ceph-pdbstatemap
+  namespace: rook-ceph
+  resourceVersion: "13553"
+  uid: 2d7a6b45-6851-459b-97ba-b19dce5a69f5

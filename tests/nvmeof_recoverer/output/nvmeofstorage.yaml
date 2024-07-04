@@ -1,0 +1,30 @@
+apiVersion: ceph.rook.io/v1
+kind: NvmeOfStorage
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"ceph.rook.io/v1","kind":"NvmeOfStorage","metadata":{"annotations":{},"name":"nvmeofstorage-pbssd1","namespace":"nvmeof-recoverer"},"spec":{"devices":[{"attachedNode":"qemu1","clusterName":"nvmeof-recoverer","deviceName":"/dev/nvme2n1","port":1153,"subnqn":"nqn.2023-01.com.samsung.semiconductor:fc641c65-2548-4788-961f-a7ebaab3dc6a:1.3.S63UNG0T619221"},{"attachedNode":"qemu2","clusterName":"nvmeof-recoverer","deviceName":"/dev/nvme2n1","port":1153,"subnqn":"nqn.2023-01.com.samsung.semiconductor:fc641c65-2548-4788-961f-a7ebaab3dc6a:1.5.S63UNG0T619219"}],"ip":"192.168.100.14","name":"pbssd1"}}
+  creationTimestamp: "2024-07-02T14:13:28Z"
+  generation: 2
+  name: nvmeofstorage-pbssd1
+  namespace: nvmeof-recoverer
+  resourceVersion: "207609"
+  uid: d7f14568-d339-4309-8a17-806b0a511fb8
+spec:
+  devices:
+  - attachedNode: qemu1
+    clusterName: nvmeof-recoverer
+    deviceName: /dev/nvme2n1
+    osdID: "1"
+    port: 1153
+    subnqn: nqn.2023-01.com.samsung.semiconductor:fc641c65-2548-4788-961f-a7ebaab3dc6a:1.3.S63UNG0T619221
+  - attachedNode: qemu2
+    clusterName: nvmeof-recoverer
+    deviceName: /dev/nvme2n1
+    osdID: "0"
+    port: 1153
+    subnqn: nqn.2023-01.com.samsung.semiconductor:fc641c65-2548-4788-961f-a7ebaab3dc6a:1.5.S63UNG0T619219
+  ip: 192.168.100.14
+  name: pbssd1
+status:
+  status: ""

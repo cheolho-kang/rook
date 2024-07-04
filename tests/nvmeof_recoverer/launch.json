@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch file",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${file}"
+        },
+        {
+            "name": "Debug Test - Current File",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${fileDirname}",
+            "args": [
+                "-testify.m",
+                "${input:TEST_NAME}"
+            ],
+            "env": {
+                "TEST_NAME_LOG": "${input:TEST_NAME}"
+            }
+        },
+    ],
+    "inputs": [
+        {
+            "id": "TEST_NAME",
+            "type": "promptString",
+            "description": "Enter the name of the test to run"
+        }
+    ]
+}
