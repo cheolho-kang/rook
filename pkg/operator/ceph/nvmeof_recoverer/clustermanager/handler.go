@@ -55,8 +55,11 @@ def disconnect_nvme(subnqn):
     try:
         result = subprocess.run(['nvme', 'disconnect', '-n', subnqn],
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        output = result.stdout.strip()
-        print(output)
+        output = result.stdout.decode('utf-8').strip()
+        if "disconnected 0 controller(s)" in output:
+            print('FAILED:', output)
+        else:
+            print(output)
     except subprocess.CalledProcessError as e:
         print('FAILED:', e)
 
@@ -212,10 +215,10 @@ func (cm *ClusterManager) runNvmeoFJob(mode, namespace, targetHost, address, por
 		logger.Errorf("failed to get logs. host: %s, err: %v", targetHost, err)
 		return "", err
 	}
-	if strings.HasPrefix(output, "FAILED:") {
-		return "", errors.New(output)
+	if strings.Contains(output, "FAILED:") {
+		return "", errors.New(fmt.Sprintf("target=%s, output: %s", targetHost, output))
 	}
 
-	logger.Debug("Successfully executed nvmeof connect/disconnect job. output: %s", output)
+	logger.Debugf("Successfully executed nvmeof connect/disconnect job. output: %s", output)
 	return output, nil
 }
