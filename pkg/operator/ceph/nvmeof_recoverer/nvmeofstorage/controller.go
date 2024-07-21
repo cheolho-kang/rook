@@ -204,10 +204,10 @@ func (r *ReconcileNvmeOfStorage) tryRelocateDevice(request reconcile.Request) er
 	r.cleanupOSD(request.Namespace, deviceInfo)
 
 	// Connect the device to the new attachable host
-	newDeviceInfo := r.reassignFaultedOSDDevice(request.Namespace, deviceInfo)
+	r.reassignFaultedOSDDevice(request.Namespace, deviceInfo)
 
 	// Request the OSD to be transferred to the next host
-	err := r.updateCephClusterCR(request, deviceInfo, newDeviceInfo)
+	err := r.updateCephClusterCR(request, deviceInfo.ClusterName)
 	if err != nil {
 		logger.Errorf("unable to update CephCluster CR, err: %v", err)
 		return err
@@ -317,14 +317,14 @@ func (r *ReconcileNvmeOfStorage) cleanupOSD(namespace string, deviceInfo cephv1.
 	logger.Debugf("successfully deleted the OSD deployment. Name: %q", osd.AppName+"-"+deviceInfo.OsdID)
 }
 
-func (r *ReconcileNvmeOfStorage) reassignFaultedOSDDevice(namespace string, deviceInfo cephv1.FabricDevice) cephv1.FabricDevice {
+func (r *ReconcileNvmeOfStorage) reassignFaultedOSDDevice(namespace string, deviceInfo cephv1.FabricDevice) {
 	nextHostName, err := r.clustermanager.GetNextAttachableHost(deviceInfo.OsdID)
 	if err != nil {
 		panic(fmt.Sprintf("Wrong Info"))
 	}
 	if nextHostName == "" {
 		// Return an empty struct when there is no attachable host, which means this OSD will be removed and rebalanced by Ceph
-		return cephv1.FabricDevice{}
+		return
 	}
 
 	// Connect the device to the new host
@@ -362,54 +362,44 @@ func (r *ReconcileNvmeOfStorage) reassignFaultedOSDDevice(namespace string, devi
 	logger.Debugf("successfully reassigned the device for OSD.%s. host: [%s --> %s], device: [%s --> %s], SubNQN: %s",
 		output.OsdID, deviceInfo.AttachedNode, output.AttachedNode, deviceInfo.DeviceName, output.DeviceName, output.SubNQN)
 
-	return output
+	return
 }
 
-func (r *ReconcileNvmeOfStorage) updateCephClusterCR(request reconcile.Request, oldDeviceInfo, newDeviceInfo cephv1.FabricDevice) error {
-	cephCluster, err := r.context.RookClientset.CephV1().CephClusters(request.Namespace).Get(context.Background(), newDeviceInfo.ClusterName, metav1.GetOptions{})
+func (r *ReconcileNvmeOfStorage) updateCephClusterCR(request reconcile.Request, clusterName string) error {
+	cephCluster, err := r.context.RookClientset.CephV1().CephClusters(request.Namespace).Get(context.Background(), clusterName, metav1.GetOptions{})
 	if err != nil {
 		logger.Errorf("failed to get cluster CR. err: %v", err)
 		return err
 	}
 
-	// Update the devices for the CephCluster CR
-	for i, node := range cephCluster.Spec.Storage.Nodes {
-		if node.Name == oldDeviceInfo.AttachedNode {
-			// Remove the device from the old node
-			var filteredDevices []cephv1.Device
-			for _, device := range node.Devices {
-				if device.Name != oldDeviceInfo.DeviceName {
-					filteredDevices = append(filteredDevices, device)
-				}
-			}
-			cephCluster.Spec.Storage.Nodes[i].Devices = filteredDevices
-		} else if node.Name == newDeviceInfo.AttachedNode {
-			// Add the new device to the new node
-			fabricHost := FabricFailureDomainPrefix + "-" + r.nvmeOfStorage.Spec.Name
-			newDevice := cephv1.Device{
-				Name: newDeviceInfo.DeviceName,
-				Config: map[string]string{
-					"failureDomain": fabricHost,
-				},
-			}
-			// Check for existing device with the same name
-			for _, device := range node.Devices {
-				if device.Name == newDeviceInfo.DeviceName {
-					panic(fmt.Sprintf("device %s already exists in the new host", newDeviceInfo.DeviceName))
-				}
-			}
-			cephCluster.Spec.Storage.Nodes[i].Devices = append(node.Devices, newDevice)
-			break
+	nodeMap := make(map[string][]cephv1.Device)
+	for _, fd := range r.nvmeOfStorage.Spec.Devices {
+		dev := cephv1.Device{
+			Name: fd.DeviceName,
+			Config: map[string]string{
+				"failureDomain": FabricFailureDomainPrefix + "-" + r.nvmeOfStorage.Spec.Name,
+			},
 		}
+		nodeMap[fd.AttachedNode] = append(nodeMap[fd.AttachedNode], dev)
 	}
+
+	var nodes []cephv1.Node
+	for nodeName, devs := range nodeMap {
+		nodes = append(nodes, cephv1.Node{
+			Name: nodeName,
+			Selection: cephv1.Selection{
+				Devices: devs,
+			},
+		})
+	}
+	cephCluster.Spec.Storage.Nodes = nodes
 
 	// Apply the updated CephCluster CR
 	_, err = r.context.RookClientset.CephV1().CephClusters(request.Namespace).Update(context.TODO(), cephCluster, metav1.UpdateOptions{})
 	if err != nil {
 		panic(fmt.Sprintf("failed to update CephCluster CR: %v", err))
 	}
-	logger.Debugf("CephCluster updated successfully. oldNode: %s, oldDevicePath: %s, newNode: %s, newDevicePath: %s",
-		oldDeviceInfo.AttachedNode, oldDeviceInfo.DeviceName, newDeviceInfo.AttachedNode, newDeviceInfo.DeviceName)
+	logger.Debugf("CephCluster updated successfully. Nodes: %+v", nodeMap)
 
 	return nil
 }
