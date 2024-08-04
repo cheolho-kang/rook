@@ -38,16 +38,15 @@ def connect_nvme(subnqn, ip_address, port):
     try:
         devices_before = get_nvme_devices()
         subprocess.run(['nvme', 'connect', '-t', 'tcp', '-n', subnqn,
-                        '-a', ip_address, '-s', port], check=True)
+                        '-a', ip_address, '-s', port], stdout=subprocess.DEVNULL, check=True)
         time.sleep(1)
     except subprocess.CalledProcessError as e:
         print('FAILED:', e)
     finally:
         devices_after = get_nvme_devices()
         new_devices = [device for device in devices_after if device not in devices_before]
-        if new_devices:
-            result = '\n'.join(new_devices)
-            print(result)
+        if len(new_devices) == 1:
+            print(new_devices[0])
         else:
             print('FAILED: No new devices connected.')
 
@@ -219,6 +218,6 @@ func (cm *ClusterManager) runNvmeoFJob(mode, namespace, targetHost, address, por
 		return "", errors.New(fmt.Sprintf("target=%s, output: %s", targetHost, output))
 	}
 
-	logger.Debugf("Successfully executed nvmeof connect/disconnect job. output: %s", output)
-	return output, nil
+	logger.Debug("Successfully executed nvmeof connect/disconnect job. output: %s", output)
+	return strings.TrimSpace(output), nil
 }
