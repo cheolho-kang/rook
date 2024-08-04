@@ -89,28 +89,28 @@ func New(context *clusterd.Context, opManagerContext context.Context) *ClusterMa
 }
 
 // AddOSD adds an OSD to the fabric map
-func (cm *ClusterManager) AddOSD(osdID string, nvmeofstorage *cephv1.NvmeOfStorage) {
-	for _, device := range nvmeofstorage.Spec.Devices {
+func (cm *ClusterManager) AddOSD(osdID, domainName string, nvmeofstorage map[string]*cephv1.NvmeOfStorage) {
+	for _, device := range nvmeofstorage[domainName].Spec.Devices {
 		if device.OsdID == osdID {
-			cm.fabricMap.AddOSD(osdID, device.AttachedNode, nvmeofstorage.Spec.IP, strconv.Itoa(device.Port), device.SubNQN)
+			cm.fabricMap.AddOSD(osdID, domainName, device.AttachedNode, nvmeofstorage[domainName].Spec.IP, strconv.Itoa(device.Port), device.SubNQN)
 			break
 		}
 	}
 }
 
 // GetNextAttachableHost returns the node with the least number of OSDs attached to it
-func (cm *ClusterManager) GetNextAttachableHost(osdID string) (string, error) {
+func (cm *ClusterManager) GetNextAttachableHost(osdID, domainName string) (string, error) {
 	output := ""
-	faultyNode, err := cm.fabricMap.FindNodeByOSD(osdID)
+	faultyNode, err := cm.fabricMap.FindNodeByOSD(osdID, domainName)
 	if err != nil {
 		return output, errors.New(fmt.Sprintf("Wrong OSD ID"))
 	}
 
 	// Find the node with the least number of OSDs
-	attachableNodes := cm.fabricMap.GetNodes()
+	attachableNodes := cm.fabricMap.GetNodes(domainName)
 	minOSDs := math.MaxInt32
 	for _, node := range attachableNodes {
-		osds, _ := cm.fabricMap.FindOSDsByNode(node)
+		osds, _ := cm.fabricMap.FindOSDsByNode(domainName, node)
 		if node != faultyNode && len(osds) < minOSDs {
 			minOSDs = len(osds)
 			output = node
@@ -118,7 +118,7 @@ func (cm *ClusterManager) GetNextAttachableHost(osdID string) (string, error) {
 	}
 
 	// Remove the fault node from the map
-	cm.fabricMap.RemoveOSD(osdID, faultyNode)
+	cm.fabricMap.RemoveOSD(osdID, domainName, faultyNode)
 
 	return output, nil
 }

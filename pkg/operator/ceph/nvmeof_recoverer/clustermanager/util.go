@@ -12,18 +12,21 @@ type FabricOSDInfo struct {
 }
 
 type FabricMap struct {
-	osdsByNode map[string][]FabricOSDInfo
+	osdsByDomin map[string]map[string][]FabricOSDInfo
 }
 
 func NewOSDNodeMap() FabricMap {
 	return FabricMap{
-		osdsByNode: make(map[string][]FabricOSDInfo),
+		osdsByDomin: make(map[string]map[string][]FabricOSDInfo),
 	}
 }
 
 // AddOSD adds an OSD to the map
-func (o FabricMap) AddOSD(osdID, node, address, port, subnqn string) {
-	o.osdsByNode[node] = append(o.osdsByNode[node], FabricOSDInfo{
+func (o FabricMap) AddOSD(osdID, domainName, node, address, port, subnqn string) {
+	if _, exists := o.osdsByDomin[domainName]; !exists {
+		o.osdsByDomin[domainName] = make(map[string][]FabricOSDInfo)
+	}
+	o.osdsByDomin[domainName][node] = append(o.osdsByDomin[domainName][node], FabricOSDInfo{
 		id:       osdID,
 		address:  address,
 		port:     port,
@@ -33,13 +36,13 @@ func (o FabricMap) AddOSD(osdID, node, address, port, subnqn string) {
 }
 
 // RemoveOSD removes an OSD from the map
-func (o *FabricMap) RemoveOSD(osdID, node string) {
-	osds := o.osdsByNode[node]
+func (o *FabricMap) RemoveOSD(osdID, domainName, node string) {
+	osds := o.osdsByDomin[domainName][node]
 	for i, osdInfo := range osds {
 		if osdInfo.id == osdID {
-			o.osdsByNode[node] = append(osds[:i], osds[i+1:]...)
-			if len(o.osdsByNode[node]) == 0 {
-				delete(o.osdsByNode, node)
+			o.osdsByDomin[domainName][node] = append(osds[:i], osds[i+1:]...)
+			if len(o.osdsByDomin[domainName][node]) == 0 {
+				delete(o.osdsByDomin[domainName], node)
 			}
 			break
 		}
@@ -47,8 +50,8 @@ func (o *FabricMap) RemoveOSD(osdID, node string) {
 }
 
 // FindNodeByOSD finds the node that an OSD is attached to
-func (o *FabricMap) FindNodeByOSD(osdID string) (string, error) {
-	for node, osds := range o.osdsByNode {
+func (o *FabricMap) FindNodeByOSD(osdID, domainName string) (string, error) {
+	for node, osds := range o.osdsByDomin[domainName] {
 		for _, osdInfo := range osds {
 			if osdInfo.id == osdID {
 				return node, nil
@@ -60,10 +63,12 @@ func (o *FabricMap) FindNodeByOSD(osdID string) (string, error) {
 
 // FindOSDBySubNQN finds the OSDInfo that has a given subnqn
 func (o *FabricMap) FindOSDBySubNQN(subnqn string) (FabricOSDInfo, error) {
-	for _, osds := range o.osdsByNode {
-		for _, osdInfo := range osds {
-			if osdInfo.subnqn == subnqn {
-				return osdInfo, nil
+	for _, osdsByNode := range o.osdsByDomin {
+		for _, osds := range osdsByNode {
+			for _, osdInfo := range osds {
+				if osdInfo.subnqn == subnqn {
+					return osdInfo, nil
+				}
 			}
 		}
 	}
@@ -71,15 +76,15 @@ func (o *FabricMap) FindOSDBySubNQN(subnqn string) (FabricOSDInfo, error) {
 }
 
 // FindOSDsByNode returns the OSDs that are attached to a node
-func (o *FabricMap) FindOSDsByNode(node string) ([]FabricOSDInfo, bool) {
-	osds, ok := o.osdsByNode[node]
+func (o *FabricMap) FindOSDsByNode(domainName, node string) ([]FabricOSDInfo, bool) {
+	osds, ok := o.osdsByDomin[domainName][node]
 	return osds, ok
 }
 
 // GetNodes returns the attachable nodes
-func (o *FabricMap) GetNodes() []string {
-	nodes := make([]string, 0, len(o.osdsByNode))
-	for node := range o.osdsByNode {
+func (o *FabricMap) GetNodes(domainName string) []string {
+	nodes := make([]string, 0, len(o.osdsByDomin[domainName]))
+	for node := range o.osdsByDomin[domainName] {
 		nodes = append(nodes, node)
 	}
 	return nodes

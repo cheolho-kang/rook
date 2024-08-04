@@ -38,12 +38,12 @@ func TestCephNvmeofRecovererSuite(t *testing.T) {
 
 type NvmeofRecovererSuite struct {
 	suite.Suite
-	helper      *clients.TestClient
-	k8sh        *utils.K8sHelper
-	settings    *installer.TestCephSettings
-	installer   *installer.CephInstaller
-	namespace   string
-	nvmeStorage cephv1.NvmeOfStorageSpec
+	helper       *clients.TestClient
+	k8sh         *utils.K8sHelper
+	settings     *installer.TestCephSettings
+	installer    *installer.CephInstaller
+	namespace    string
+	nvmeStorages []cephv1.NvmeOfStorageSpec
 }
 
 func (s *NvmeofRecovererSuite) SetupSuite() {
@@ -71,8 +71,10 @@ func (s *NvmeofRecovererSuite) TearDownSuite() {
 
 func (s *NvmeofRecovererSuite) baseSetup() {
 	nodeDeviceMappings := make(map[string][]string)
-	for _, device := range s.nvmeStorage.Devices {
-		nodeDeviceMappings[device.AttachedNode] = append(nodeDeviceMappings[device.AttachedNode], device.DeviceName)
+	for _, nvmeStorage := range s.nvmeStorages {
+		for _, device := range nvmeStorage.Devices {
+			nodeDeviceMappings[device.AttachedNode] = append(nodeDeviceMappings[device.AttachedNode], device.DeviceName)
+		}
 	}
 	s.settings.NodeDeviceMappings = nodeDeviceMappings
 
@@ -83,30 +85,32 @@ func (s *NvmeofRecovererSuite) baseSetup() {
 func (s *NvmeofRecovererSuite) TestBasicSingleFabricDomain() {
 	node1 := "node1"
 	node2 := "node2"
-	s.nvmeStorage = cephv1.NvmeOfStorageSpec{
-		Name: "nvmeofstorage-pbssd1",
-		IP:   "192.168.100.11",
-		Devices: []cephv1.FabricDevice{
-			{
-				SubNQN:       "nqn.2024-07.com.example:storage1",
-				Port:         1152,
-				AttachedNode: node1,
-				DeviceName:   "/dev/nvme0n1",
-				ClusterName:  s.namespace,
-			},
-			{
-				SubNQN:       "nqn.2024-07.com.example:storage2",
-				Port:         1152,
-				AttachedNode: node2,
-				DeviceName:   "/dev/nvme1n1",
-				ClusterName:  s.namespace,
-			},
-			{
-				SubNQN:       "nqn.2024-07.com.example:storage3",
-				Port:         1152,
-				AttachedNode: node1,
-				DeviceName:   "/dev/nvme2n1",
-				ClusterName:  s.namespace,
+	s.nvmeStorages = []cephv1.NvmeOfStorageSpec{
+		{
+			Name: "nvmeofstorage-pbssd1",
+			IP:   "192.168.100.11",
+			Devices: []cephv1.FabricDevice{
+				{
+					SubNQN:       "nqn.2024-07.com.example:storage1",
+					Port:         1152,
+					AttachedNode: node1,
+					DeviceName:   "/dev/nvme0n1",
+					ClusterName:  s.namespace,
+				},
+				{
+					SubNQN:       "nqn.2024-07.com.example:storage2",
+					Port:         1152,
+					AttachedNode: node2,
+					DeviceName:   "/dev/nvme1n1",
+					ClusterName:  s.namespace,
+				},
+				{
+					SubNQN:       "nqn.2024-07.com.example:storage3",
+					Port:         1152,
+					AttachedNode: node1,
+					DeviceName:   "/dev/nvme2n1",
+					ClusterName:  s.namespace,
+				},
 			},
 		},
 	}
@@ -115,10 +119,10 @@ func (s *NvmeofRecovererSuite) TestBasicSingleFabricDomain() {
 	s.T().Run("TestDeployFabricDomainCluster", func(t *testing.T) {
 		logger.Info("Start TestDeployFabricDomainCluster")
 		// Apply the nvmeofstorage CR
-		s.helper.RecovererClient.CreateNvmeOfStorage(s.namespace, s.nvmeStorage)
+		s.helper.RecovererClient.CreateNvmeOfStorage(s.namespace, s.nvmeStorages)
 
 		// Check OSD failure domain
-		targetDomainRecource := s.nvmeStorage
+		targetDomainRecource := s.nvmeStorages[0]
 		s.helper.RecovererClient.CheckOSDLocationUntilMatch(s.namespace, targetDomainRecource)
 	})
 
@@ -216,6 +220,128 @@ func (s *NvmeofRecovererSuite) TestBasicSingleFabricDomain() {
 
 		// Check OSD pod is not transfered to another node since available attachable hosts are not enough.
 		// Wait for 30 seconds to make sure the OSD pod is not reassigned to another node
+		require.NotNil(s.T(), s.k8sh.WaitForLabeledPodsToRunWithRetries(fmt.Sprintf("ceph-osd-id=%s", targetOSDID), s.namespace, 6))
+	})
+}
+
+func (s *NvmeofRecovererSuite) TestBasicMultiFabricDomain() {
+	node1 := "smrc2-vm1"
+	node2 := "smrc2-vm2"
+	s.nvmeStorages = []cephv1.NvmeOfStorageSpec{
+		{
+			Name: "nvmeofstorage-pbssd1",
+			IP:   "192.168.100.11",
+			Devices: []cephv1.FabricDevice{
+				{
+					SubNQN:       "nqn.2024-07.com.example:storage1",
+					Port:         1152,
+					AttachedNode: node1,
+					DeviceName:   "/dev/nvme2n1",
+					ClusterName:  s.namespace,
+				},
+				{
+					SubNQN:       "nqn.2024-07.com.example:storage2",
+					Port:         1152,
+					AttachedNode: node2,
+					DeviceName:   "/dev/nvme2n1",
+					ClusterName:  s.namespace,
+				},
+			},
+		},
+		{
+			Name: "nvmeofstorage-pbssd1",
+			IP:   "192.168.100.11",
+			Devices: []cephv1.FabricDevice{
+				{
+					SubNQN:       "nqn.2024-07.com.example:storage3",
+					Port:         1152,
+					AttachedNode: node1,
+					DeviceName:   "/dev/nvme3n1",
+					ClusterName:  s.namespace,
+				},
+				{
+					SubNQN:       "nqn.2024-07.com.example:storage4",
+					Port:         1152,
+					AttachedNode: node2,
+					DeviceName:   "/dev/nvme4n1",
+					ClusterName:  s.namespace,
+				},
+			},
+		},
+	}
+	s.baseSetup()
+
+	s.T().Run("TestDeployMultipleFabricDomainCluster", func(t *testing.T) {
+		logger.Info("Start TestDeployMultipleFabricDomainCluster")
+		// Apply the nvmeofstorage CR
+		s.helper.RecovererClient.CreateNvmeOfStorage(s.namespace, s.nvmeStorages)
+
+		// Check OSD failure domain
+		targetDomainRecource := s.nvmeStorages[0]
+		s.helper.RecovererClient.CheckOSDLocationUntilMatch(s.namespace, targetDomainRecource)
+
+		targetDomainRecource = s.nvmeStorages[1]
+		s.helper.RecovererClient.CheckOSDLocationUntilMatch(s.namespace, targetDomainRecource)
+	})
+
+	s.T().Run("TestDomain1FaultInjection", func(t *testing.T) {
+		logger.Info("Start TestDomain1FaultInjection")
+		// Inject fault to the osd pod
+		targetNode := node1
+		targetDomainRecource := s.nvmeStorages[0]
+		targetOSDID := s.helper.RecovererClient.GetOSDsLocatedAtNodForDomain(s.namespace, targetNode, targetDomainRecource)[0]
+
+		oldOSDLocation := s.helper.RecovererClient.GetNodeLocation(s.namespace, targetOSDID)
+		s.helper.RecovererClient.InjectFaultToOSD(s.namespace, targetOSDID)
+
+		// Check the osd pod is removed by nvmeofstorage controller
+		s.helper.RecovererClient.WaitUntilPodDeletedFromTargetNode(s.namespace, targetOSDID, targetNode)
+
+		// Check OSD pod is transfered to another node
+		require.Nil(s.T(), s.k8sh.WaitForPodCount(fmt.Sprintf("ceph-osd-id=%s", targetOSDID), s.namespace, 1))
+		newOSDLocation := s.helper.RecovererClient.GetNodeLocation(s.namespace, targetOSDID)
+		require.NotEqual(s.T(), oldOSDLocation, newOSDLocation)
+	})
+
+	s.T().Run("TestFaultInjectMultipleOSDInMultiFabricDomains", func(t *testing.T) {
+		logger.Info("Start TestFaultInjectMultipleOSD")
+		// Inject fault to the osd pod
+		targetNode := node2
+		targetDomainRecource := s.nvmeStorages[0]
+		targetOSD1ID := s.helper.RecovererClient.GetOSDsLocatedAtNodForDomain(s.namespace, targetNode, targetDomainRecource)[0]
+
+		targetNode = node2
+		targetDomainRecource = s.nvmeStorages[1]
+		targetOSD2ID := s.helper.RecovererClient.GetOSDsLocatedAtNodForDomain(s.namespace, targetNode, targetDomainRecource)[0]
+
+		oldOSD2Location := s.helper.RecovererClient.GetNodeLocation(s.namespace, targetOSD2ID)
+		s.helper.RecovererClient.InjectFaultToOSD(s.namespace, targetOSD1ID)
+		s.helper.RecovererClient.InjectFaultToOSD(s.namespace, targetOSD2ID)
+
+		// Check the osd pod is removed by nvmeofstorage controller
+		s.helper.RecovererClient.WaitUntilPodDeletedFromTargetNode(s.namespace, targetOSD1ID, targetNode)
+		s.helper.RecovererClient.WaitUntilPodDeletedFromTargetNode(s.namespace, targetOSD2ID, targetNode)
+
+		// Check OSD pod is transfered to another node
+		require.Nil(s.T(), s.k8sh.WaitForPodCount(fmt.Sprintf("ceph-osd-id=%s", targetOSD2ID), s.namespace, 1))
+		require.NotNil(s.T(), s.k8sh.WaitForLabeledPodsToRunWithRetries(fmt.Sprintf("ceph-osd-id=%s", targetOSD1ID), s.namespace, 6))
+		newOSD2Location := s.helper.RecovererClient.GetNodeLocation(s.namespace, targetOSD2ID)
+		require.NotEqual(s.T(), oldOSD2Location, newOSD2Location)
+	})
+
+	s.T().Run("TestDomain1FaultInjectOSDForAttachableHostsValidation", func(t *testing.T) {
+		logger.Info("Start TestDomain1FaultInjectOSDForAttachableHostsValidation")
+		targetNode := node1
+		targetDomainRecource := s.nvmeStorages[1]
+		targetOSDID := s.helper.RecovererClient.GetOSDsLocatedAtNodForDomain(s.namespace, targetNode, targetDomainRecource)[0]
+
+		// Inject fault to the osd pod
+		s.helper.RecovererClient.InjectFaultToOSD(s.namespace, targetOSDID)
+
+		// Check the osd pod is removed by nvmeofstorage controller
+		s.helper.RecovererClient.WaitUntilPodDeletedFromTargetNode(s.namespace, targetOSDID, targetNode)
+
+		// Check OSD pod is not transfered to another node
 		require.NotNil(s.T(), s.k8sh.WaitForLabeledPodsToRunWithRetries(fmt.Sprintf("ceph-osd-id=%s", targetOSDID), s.namespace, 6))
 	})
 }

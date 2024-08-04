@@ -58,8 +58,9 @@ func CreateNvmeofRecovererOperation(k8shelp *utils.K8sHelper, manifests installe
 	return &NvmeofRecovererOperation{k8shelp, manifests}
 }
 
-func (n *NvmeofRecovererOperation) CreateNvmeOfStorage(namespace string, resource cephv1.NvmeOfStorageSpec) {
-	nvmeofstorageResource := `
+func (n *NvmeofRecovererOperation) CreateNvmeOfStorage(namespace string, resources []cephv1.NvmeOfStorageSpec) {
+	for _, resource := range resources {
+		nvmeofstorageResource := `
 apiVersion: ceph.rook.io/v1
 kind: NvmeOfStorage
 metadata:
@@ -68,20 +69,21 @@ metadata:
 spec:
   name: ` + resource.Name + `
   ip: ` + resource.IP
-	if len(resource.Devices) > 0 {
-		nvmeofstorageResource += `
-  devices:`
-		for _, device := range resource.Devices {
+		if len(resource.Devices) > 0 {
 			nvmeofstorageResource += `
+  devices:`
+			for _, device := range resource.Devices {
+				nvmeofstorageResource += `
     - subnqn: "` + device.SubNQN + `"
       port: ` + fmt.Sprintf("%d", device.Port) + `
       attachedNode: "` + device.AttachedNode + `"
       deviceName: "` + device.DeviceName + `"
       clusterName: "` + device.ClusterName + `"`
+			}
 		}
+		err := n.k8sh.ResourceOperation("apply", nvmeofstorageResource)
+		require.Nil(n.k8sh.T(), err)
 	}
-	err := n.k8sh.ResourceOperation("apply", nvmeofstorageResource)
-	require.Nil(n.k8sh.T(), err)
 }
 
 // CheckOSDLocationUntilMatch checks the OSD location until the OSDs are placed in the expected domain
