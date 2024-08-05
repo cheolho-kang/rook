@@ -102,6 +102,7 @@ func StartTestCluster(t func() *testing.T, settings *installer.TestCephSettings)
 	capnslog.SetGlobalLogLevel(capnslog.DEBUG)
 
 	installer := installer.NewCephInstaller(t, k8shelper.Clientset, settings)
+	installer.UninstallRook()
 	isRookInstalled, err := installer.InstallRook()
 
 	if !isRookInstalled || err != nil {

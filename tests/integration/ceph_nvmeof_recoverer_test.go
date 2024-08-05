@@ -29,11 +29,11 @@ import (
 )
 
 func TestCephNvmeofRecovererSuite(t *testing.T) {
-	s := new(NvmeofRecovererSuite)
-	defer func(s *NvmeofRecovererSuite) {
-		HandlePanics(recover(), s.TearDownSuite, s.T)
-	}(s)
-	suite.Run(t, s)
+	// s := new(NvmeofRecovererSuite)
+	// defer func(s *NvmeofRecovererSuite) {
+	// 	HandlePanics(recover(), s.TearDownSuite, s.T)
+	// }(s)
+	suite.Run(t, new(NvmeofRecovererSuite))
 }
 
 type NvmeofRecovererSuite struct {
@@ -83,32 +83,32 @@ func (s *NvmeofRecovererSuite) baseSetup() {
 }
 
 func (s *NvmeofRecovererSuite) TestBasicSingleFabricDomain() {
-	node1 := "node1"
-	node2 := "node2"
+	node1 := "smrc2-vm1"
+	node2 := "smrc2-vm2"
 	s.nvmeStorages = []cephv1.NvmeOfStorageSpec{
 		{
 			Name: "nvmeofstorage-pbssd1",
-			IP:   "192.168.100.11",
+			IP:   "10.10.40.41",
 			Devices: []cephv1.FabricDevice{
 				{
-					SubNQN:       "nqn.2024-07.com.example:storage1",
-					Port:         1152,
-					AttachedNode: node1,
-					DeviceName:   "/dev/nvme0n1",
-					ClusterName:  s.namespace,
-				},
-				{
-					SubNQN:       "nqn.2024-07.com.example:storage2",
-					Port:         1152,
-					AttachedNode: node2,
-					DeviceName:   "/dev/nvme1n1",
-					ClusterName:  s.namespace,
-				},
-				{
-					SubNQN:       "nqn.2024-07.com.example:storage3",
+					SubNQN:       "nqn.2023-01.com.samsung.semiconductor:0.S63UNG0T620310",
 					Port:         1152,
 					AttachedNode: node1,
 					DeviceName:   "/dev/nvme2n1",
+					ClusterName:  s.namespace,
+				},
+				{
+					SubNQN:       "nqn.2023-01.com.samsung.semiconductor:0.S63UNG0T620311",
+					Port:         1152,
+					AttachedNode: node2,
+					DeviceName:   "/dev/nvme2n1",
+					ClusterName:  s.namespace,
+				},
+				{
+					SubNQN:       "nqn.2023-01.com.samsung.semiconductor:0.S63UNG0T620312",
+					Port:         1152,
+					AttachedNode: node1,
+					DeviceName:   "/dev/nvme3n1",
 					ClusterName:  s.namespace,
 				},
 			},
@@ -230,17 +230,17 @@ func (s *NvmeofRecovererSuite) TestBasicMultiFabricDomain() {
 	s.nvmeStorages = []cephv1.NvmeOfStorageSpec{
 		{
 			Name: "nvmeofstorage-pbssd1",
-			IP:   "192.168.100.11",
+			IP:   "10.10.40.41",
 			Devices: []cephv1.FabricDevice{
 				{
-					SubNQN:       "nqn.2024-07.com.example:storage1",
+					SubNQN:       "nqn.2023-01.com.samsung.semiconductor:0.S63UNG0T620310",
 					Port:         1152,
 					AttachedNode: node1,
 					DeviceName:   "/dev/nvme2n1",
 					ClusterName:  s.namespace,
 				},
 				{
-					SubNQN:       "nqn.2024-07.com.example:storage2",
+					SubNQN:       "nqn.2023-01.com.samsung.semiconductor:0.S63UNG0T620311",
 					Port:         1152,
 					AttachedNode: node2,
 					DeviceName:   "/dev/nvme2n1",
@@ -249,21 +249,21 @@ func (s *NvmeofRecovererSuite) TestBasicMultiFabricDomain() {
 			},
 		},
 		{
-			Name: "nvmeofstorage-pbssd1",
-			IP:   "192.168.100.11",
+			Name: "nvmeofstorage-pbssd2",
+			IP:   "10.10.40.41",
 			Devices: []cephv1.FabricDevice{
 				{
-					SubNQN:       "nqn.2024-07.com.example:storage3",
+					SubNQN:       "nqn.2023-01.com.samsung.semiconductor:0.S63UNG0T620312",
 					Port:         1152,
 					AttachedNode: node1,
 					DeviceName:   "/dev/nvme3n1",
 					ClusterName:  s.namespace,
 				},
 				{
-					SubNQN:       "nqn.2024-07.com.example:storage4",
+					SubNQN:       "nqn.2023-01.com.samsung.semiconductor:0.S63UNG0T620313",
 					Port:         1152,
 					AttachedNode: node2,
-					DeviceName:   "/dev/nvme4n1",
+					DeviceName:   "/dev/nvme3n1",
 					ClusterName:  s.namespace,
 				},
 			},

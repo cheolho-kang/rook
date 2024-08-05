@@ -96,6 +96,7 @@ func (cm *ClusterManager) AddOSD(osdID, domainName string, nvmeofstorage map[str
 			break
 		}
 	}
+	logger.Debugf("Added OSD.%s to HostMap. OSDsByDomain: %+v", osdID, cm.fabricMap.osdsByDomin)
 }
 
 // GetNextAttachableHost returns the node with the least number of OSDs attached to it
@@ -120,6 +121,7 @@ func (cm *ClusterManager) GetNextAttachableHost(osdID, domainName string) (strin
 	// Remove the fault node from the map
 	cm.fabricMap.RemoveOSD(osdID, domainName, faultyNode)
 
+	logger.Debugf("Reassigned OSD.%s. OSDsByDomain: %+v", osdID, cm.fabricMap.osdsByDomin)
 	return output, nil
 }
 
