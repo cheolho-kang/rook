@@ -345,3 +345,87 @@ func (s *NvmeofRecovererSuite) TestBasicMultiFabricDomain() {
 		require.NotNil(s.T(), s.k8sh.WaitForLabeledPodsToRunWithRetries(fmt.Sprintf("ceph-osd-id=%s", targetOSDID), s.namespace, 6))
 	})
 }
+
+func (s *NvmeofRecovererSuite) TestWriteAndRecovery() {
+	node1 := "smrc2-vm1"
+	node2 := "smrc2-vm2"
+	s.nvmeStorages = []cephv1.NvmeOfStorageSpec{
+		{
+			Name: "nvmeofstorage-pbssd1",
+			IP:   "10.10.40.41",
+			Devices: []cephv1.FabricDevice{
+				{
+					SubNQN:       "nqn.2023-01.com.samsung.semiconductor:0.S63UNG0T620310",
+					Port:         1152,
+					AttachedNode: node1,
+					DeviceName:   "/dev/nvme2n1",
+					ClusterName:  s.namespace,
+				},
+				{
+					SubNQN:       "nqn.2023-01.com.samsung.semiconductor:0.S63UNG0T620311",
+					Port:         1152,
+					AttachedNode: node2,
+					DeviceName:   "/dev/nvme2n1",
+					ClusterName:  s.namespace,
+				},
+				{
+					SubNQN:       "nqn.2023-01.com.samsung.semiconductor:0.S63UNG0T620312",
+					Port:         1152,
+					AttachedNode: node1,
+					DeviceName:   "/dev/nvme3n1",
+					ClusterName:  s.namespace,
+				},
+				{
+					SubNQN:       "nqn.2023-01.com.samsung.semiconductor:0.S63UNG0T620313",
+					Port:         1152,
+					AttachedNode: node2,
+					DeviceName:   "/dev/nvme3n1",
+					ClusterName:  s.namespace,
+				},
+			},
+		},
+	}
+	s.baseSetup()
+
+	s.T().Run("TestDeployFabricDomainCluster", func(t *testing.T) {
+		logger.Info("Start TestDeployFabricDomainCluster")
+		// Apply the nvmeofstorage CR
+		s.helper.RecovererClient.CreateNvmeOfStorage(s.namespace, s.nvmeStorages)
+
+		// Check OSD failure domain
+		targetDomainRecource := s.nvmeStorages[0]
+		s.helper.RecovererClient.CheckOSDLocationUntilMatch(s.namespace, targetDomainRecource)
+	})
+
+	s.T().Run("TestFaultInjectionAfterWrite", func(t *testing.T) {
+		logger.Info("Start TestFaultInjectionAfterWrite")
+
+		testName := "write-test1"
+		testTime := "10"
+		volumeSize := "10G"
+		poolName := s.namespace + "-pool"
+		storageClassName := s.namespace + "-sc"
+		pvcName := testName + "-pvc"
+		defer s.helper.RecovererClient.CleanupBlockWriteTest(s.namespace, poolName, storageClassName, pvcName, testName)
+		err := s.helper.BlockClient.CreatePoolAndStorageClass(defaultNamespace, poolName, storageClassName, "Delete")
+		require.NoError(s.T(), err)
+		s.helper.RecovererClient.RunFioWriteTestUntilComplete(s.namespace, poolName, storageClassName, pvcName, volumeSize, testName, testTime)
+
+		// Wait to make sure the write test is completed
+		s.helper.RecovererClient.WaitUntilPodTerminated(testName, s.namespace)
+
+		// Inject fault to the OSD pod
+		targetNode := node1
+		targetOSDID := s.helper.RecovererClient.GetOSDsLocatedAtNode(s.namespace, targetNode)[0]
+		oldOSDLocation := s.helper.RecovererClient.GetNodeLocation(s.namespace, targetOSDID)
+		s.helper.RecovererClient.InjectFaultToOSD(s.namespace, targetOSDID)
+
+		// Check the faulted OSD pod is removed by nvmeofstorage controller
+		s.helper.RecovererClient.WaitUntilPodDeletedFromTargetNode(s.namespace, targetOSDID, targetNode)
+
+		// Check OSD pod is reassigned to another node
+		require.Nil(s.T(), s.k8sh.WaitForPodCount(fmt.Sprintf("ceph-osd-id=%s", targetOSDID), s.namespace, 1))
+		newOSDLocation := s.helper.RecovererClient.GetNodeLocation(s.namespace, targetOSDID)
+		require.NotEqual(s.T(), oldOSDLocation, newOSDLocation)
+	})
+}

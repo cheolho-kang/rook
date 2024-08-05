@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,9 +24,11 @@ import (
 	"time"
 
 	cephv1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1"
+	"github.com/rook/rook/pkg/daemon/ceph/client"
 	"github.com/rook/rook/pkg/operator/ceph/nvmeof_recoverer/nvmeofstorage"
 	"github.com/rook/rook/tests/framework/installer"
 	"github.com/rook/rook/tests/framework/utils"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -217,4 +219,94 @@ func (n *NvmeofRecovererOperation) WaitUntilPodDeletedFromTargetNode(namespace, 
 		return true, nil
 	})
 	require.Nil(n.k8sh.T(), err, fmt.Sprintf("Failed to wait OSD %s to be deleted from %s", targetOSDID, targetNode))
+}
+
+// WaitUntilPodDeletedFromTargetNode waits until the OSD pod is deleted from the target node
+func (n *NvmeofRecovererOperation) WaitUntilPodTerminated(namespace, podName string) {
+	err := wait.PollUntilContextTimeout(context.TODO(), 3*time.Second, 300*time.Second, true, func(context context.Context) (done bool, err error) {
+		result := n.k8sh.IsPodTerminated(podName, namespace)
+		if result {
+			return true, nil
+		}
+		return false, nil
+	})
+	require.Nil(n.k8sh.T(), err, fmt.Sprintf("Failed to wait pod %s to be terminated", podName))
+}
+
+func (n *NvmeofRecovererOperation) RunFioWriteTestUntilComplete(namespace, poolName, storageClassName, pvcName, volumeSize, podName, writeTime string) {
+	n.createAndWaitForPVC(namespace, poolName, storageClassName, pvcName, volumeSize)
+
+	err := n.k8sh.ResourceOperation("apply", getFIOTestPodDefinition(namespace, podName, pvcName, writeTime))
+	assert.NoError(n.k8sh.T(), err)
+
+	logger.Infof("Fio write test completed successfully")
+}
+
+func (n *NvmeofRecovererOperation) createAndWaitForPVC(namespace, poolName, storageClassName, pvcName, volumeSize string) {
+	pvcManifest := installer.GetPVC(pvcName, namespace, storageClassName, "ReadWriteOnce", volumeSize) + "\n  volumeMode: Block"
+	err := n.k8sh.ResourceOperation("apply", pvcManifest)
+	require.NoError(n.k8sh.T(), err)
+	require.True(n.k8sh.T(), n.k8sh.WaitUntilPVCIsBound(namespace, pvcName))
+
+	// Make sure new block is created cause of PVC
+	clusterInfo := client.AdminTestClusterInfo(namespace)
+	rbdImages, err := client.ListImagesInPool(n.k8sh.MakeContext(), clusterInfo, poolName)
+	require.NoError(n.k8sh.T(), err, fmt.Sprintf("failed to get images from pool %s: %+v", poolName, err))
+	require.Equal(n.k8sh.T(), 1, len(rbdImages), "Make sure new block image is created")
+}
+
+func (n *NvmeofRecovererOperation) CleanupBlockWriteTest(namespace, poolName, storageClassName, pvcName, podName string) {
+	// Delete the pod used for the write test
+	n.k8sh.DeletePod(namespace, podName)
+
+	// Delete the PVC
+	err := n.k8sh.Clientset.CoreV1().PersistentVolumeClaims(namespace).Delete(context.TODO(), pvcName, metav1.DeleteOptions{})
+	require.NoError(n.k8sh.T(), err)
+	require.True(n.k8sh.T(), n.k8sh.WaitUntilPVCIsDeleted(namespace, pvcName))
+
+	// Delete the storage class
+	err = n.k8sh.Clientset.StorageV1().StorageClasses().Delete(context.TODO(), storageClassName, metav1.DeleteOptions{})
+	require.NoError(n.k8sh.T(), err)
+
+	// Delete the pool used for the write test
+	err = n.k8sh.RookClientset.CephV1().CephBlockPools(namespace).Delete(context.TODO(), poolName, metav1.DeleteOptions{})
+	require.NoError(n.k8sh.T(), err)
+}
+
+func getFIOTestPodDefinition(namespace, podName, pvcName, runtime string) string {
+	return `
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ` + podName + `
+  namespace: ` + namespace + `
+spec:
+  containers:
+  - name: ` + podName + `
+    image: xridge/fio:latest
+    command: ["fio"]
+    args:
+    - "--name=test"
+    - "--filename=/dev/block1"
+    - "--rw=write"
+    - "--ioengine=libaio"
+    - "--direct=1"
+    - "--bs=1M"
+    - "--numjobs=1"
+    - "--iodepth=32"
+    - "--group_reporting"
+    - "--runtime=` + runtime + `
+    imagePullPolicy: IfNotPresent
+    securityContext:
+      capabilities:
+        add: ["SYS_ADMIN"]
+    volumeDevices:
+    - devicePath: /dev/block1
+      name: csivol
+  volumes:
+  - name: csivol
+    persistentVolumeClaim:
+      claimName: ` + pvcName + `
+  restartPolicy: Never
+`
 }
