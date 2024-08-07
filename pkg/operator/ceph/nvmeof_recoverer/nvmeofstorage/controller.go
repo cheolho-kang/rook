@@ -255,11 +255,12 @@ func (r *ReconcileNvmeOfStorage) reconstructCRUSHMap(context context.Context, na
 				if pod.Spec.NodeName == device.AttachedNode && envVar.Name == "ROOK_BLOCK_PATH" && envVar.Value == device.DeviceName {
 					device.OsdID = pod.Labels["ceph-osd-id"]
 					clusterName = pod.Labels["app.kubernetes.io/part-of"]
+					crushRoot := pod.Labels["topology-location-root"]
 
 					// Update CRUSH map for OSD relocation to fabric failure domain
 					fabricHost := FabricFailureDomainPrefix + "-" + r.nvmeOfStorage.Spec.Name
 					clusterInfo := cephclient.AdminClusterInfo(context, namespace, clusterName)
-					cmd := []string{"osd", "crush", "move", "osd." + device.OsdID, "host=" + fabricHost}
+					cmd := []string{"osd", "crush", "move", fmt.Sprintf("osd.%s", device.OsdID), fmt.Sprintf("root=%s", crushRoot), fmt.Sprintf("host=%s", fabricHost)}
 					exec := cephclient.NewCephCommand(r.context, clusterInfo, cmd)
 					exec.JsonOutput = true
 					buf, err := exec.Run()
