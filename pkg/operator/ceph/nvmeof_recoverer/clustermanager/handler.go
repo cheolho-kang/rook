@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strconv"
 	"strings"
 	"time"
 
@@ -93,7 +92,7 @@ func New(context *clusterd.Context, opManagerContext context.Context) *ClusterMa
 func (cm *ClusterManager) AddOSD(osdID string, nvmeofstorage *cephv1.NvmeOfStorage) {
 	for _, device := range nvmeofstorage.Spec.Devices {
 		if device.OsdID == osdID {
-			cm.fabricMap.AddOSD(osdID, device.AttachedNode, nvmeofstorage.Spec.IP, strconv.Itoa(device.Port), device.SubNQN)
+			cm.fabricMap.AddOSD(osdID, device.TargetNode, device.IP, device.Port, device.SubNQN)
 			break
 		}
 	}
@@ -124,16 +123,18 @@ func (cm *ClusterManager) GetNextAttachableHost(osdID string) (string, error) {
 	return output, nil
 }
 
-func (cm *ClusterManager) ConnectOSDDeviceToHost(namespace, targetHost string, fabricDeviceInfo cephv1.FabricDevice) (cephv1.FabricDevice, error) {
-	output := *fabricDeviceInfo.DeepCopy()
-	osdInfo, err := cm.fabricMap.FindOSDBySubNQN(fabricDeviceInfo.SubNQN)
-	if err != nil {
-		panic("OSD not found for subnqn")
-	}
-	newDevice, err := cm.runNvmeoFJob("connect", namespace, targetHost, osdInfo.address, osdInfo.port, osdInfo.subnqn)
+func (cm *ClusterManager) ConnectOSDDeviceToHost(namespace, targetHost string, fabricDeviceInfo cephv1.FabricDevice) (ConnectionInfo, error) {
+	// osdInfo, err := cm.fabricMap.FindOSDBySubNQN(fabricDeviceInfo.SubNQN)
+	// if err != nil {
+	// 	panic("OSD not found for subnqn")
+	// }
+	output := ConnectionInfo{}
+	newDevice, err := cm.runNvmeoFJob("connect", namespace, targetHost, fabricDeviceInfo.IP, fabricDeviceInfo.Port, fabricDeviceInfo.SubNQN)
 	if err == nil {
-		output.AttachedNode = targetHost
-		output.DeviceName = newDevice
+		output = ConnectionInfo{
+			attachedNode: targetHost,
+			devicePath:   newDevice,
+		}
 	}
 	return output, err
 }
