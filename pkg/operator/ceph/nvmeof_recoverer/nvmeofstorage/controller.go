@@ -31,7 +31,6 @@ import (
 	cephclient "github.com/rook/rook/pkg/daemon/ceph/client"
 	"github.com/rook/rook/pkg/operator/ceph/cluster/osd"
 	opcontroller "github.com/rook/rook/pkg/operator/ceph/controller"
-	cm "github.com/rook/rook/pkg/operator/ceph/nvmeof_recoverer/clustermanager"
 	"github.com/rook/rook/pkg/operator/ceph/reporting"
 	"github.com/rook/rook/pkg/operator/k8sutil"
 	corev1 "k8s.io/api/core/v1"
@@ -84,7 +83,7 @@ type ReconcileNvmeOfStorage struct {
 	context          *clusterd.Context
 	opManagerContext context.Context
 	recorder         record.EventRecorder
-	clustermanager   *cm.ClusterManager
+	fabricMap        *FabricMap
 	nvmeOfStorage    *cephv1.NvmeOfStorage
 }
 
@@ -101,8 +100,8 @@ func newReconciler(mgr manager.Manager, context *clusterd.Context, opManagerCont
 		scheme:           mgr.GetScheme(),
 		opManagerContext: opManagerContext,
 		recorder:         mgr.GetEventRecorderFor("rook-" + controllerName),
+		fabricMap:        NewFabricMap(),
 		nvmeOfStorage:    &cephv1.NvmeOfStorage{},
-		clustermanager:   cm.New(context, opManagerContext),
 	}
 }
 
@@ -263,7 +262,7 @@ func (r *ReconcileNvmeOfStorage) reconstructCRUSHMap(context context.Context, na
 						device.OsdID, device.AttachedNode, fabricHost)
 
 					// Update the OSD deployment depending on the nvmeofstorage CR
-					r.clustermanager.AddOSD(device.OsdID, r.nvmeOfStorage)
+					r.fabricMap.AddOSD(device.OsdID, r.nvmeOfStorage)
 				}
 			}
 		}
@@ -303,19 +302,19 @@ func (r *ReconcileNvmeOfStorage) cleanupOSD(namespace string, deviceInfo cephv1.
 	logger.Debugf("successfully deleted the OSD deployment. Name: %q", podName)
 
 	// Disconnect the device used by this OSD
-	if _, err := r.clustermanager.DisconnectOSDDevice(namespace, deviceInfo); err != nil {
+	if _, err := r.disconnectOSDDevice(namespace, deviceInfo); err != nil {
 		panic(fmt.Sprintf("failed to disconnect OSD device with SubNQN %s: %v", deviceInfo.SubNQN, err))
 	}
 }
 
 func (r *ReconcileNvmeOfStorage) reassignFaultedOSDDevice(namespace string, deviceInfo cephv1.FabricDevice) cephv1.FabricDevice {
-	targetNode := r.clustermanager.GetNextAttachableNode(deviceInfo)
+	targetNode := r.fabricMap.GetNextAttachableNode(deviceInfo)
 	if targetNode == "" {
 		// Return an empty struct when there is no attachable node, which means this OSD will be removed and rebalanced by Ceph
 		return cephv1.FabricDevice{}
 	}
 
-	output, err := r.clustermanager.ConnectOSDDeviceToNode(namespace, targetNode, deviceInfo)
+	output, err := r.connectOSDDeviceToNode(namespace, targetNode, deviceInfo)
 	if err != nil {
 		// TODO (cheolho.kang): If connectOSDDeviceToNode fails due to an abnormal targetNode,
 		// implement logic to exclude the current targetNode and search for the next attachable node.
@@ -324,7 +323,7 @@ func (r *ReconcileNvmeOfStorage) reassignFaultedOSDDevice(namespace string, devi
 	}
 
 	// Update the attached node for reassigning the device
-	r.clustermanager.AddOSD(output.OsdID, r.nvmeOfStorage)
+	r.fabricMap.AddOSD(output.OsdID, r.nvmeOfStorage)
 
 	// TODO (cheolho.kang): these lines should be moved to initialization phase. Other updatable data (e.g., device name, attached node) should be separated from CR and managed via k8s (e.g., etcd, configmap) (PBDEV-1748)
 	// Update the NvmeOfStorage CR
@@ -409,6 +408,40 @@ func (r *ReconcileNvmeOfStorage) updateCephClusterCR(namespace string, oldDevice
 	logger.Debug("CephCluster updated successfully.")
 
 	return nil
+}
+
+// connectOSDDeviceToNode runs a job to connect an NVMe-oF device to the target node
+func (r *ReconcileNvmeOfStorage) connectOSDDeviceToNode(namespace, targetNode string, deviceInfo cephv1.FabricDevice) (cephv1.FabricDevice, error) {
+	output := *deviceInfo.DeepCopy()
+	fd, err := r.fabricMap.FindDescriptorBySubNQN(deviceInfo.SubNQN)
+	if err != nil {
+		panic("failed to find the device with SubNQN " + deviceInfo.SubNQN)
+	}
+	jobCode := fmt.Sprintf(nvmeofToolCode, "connect", fd.Address, fd.Port, fd.SubNQN)
+	jobOutput, err := RunJob(r.opManagerContext, r.context.Clientset, namespace, targetNode, jobCode)
+	if err != nil || !strings.Contains(jobOutput, "SUCCESS:") {
+		return output, fmt.Errorf("failed to connect NVMe-oF device. fd: %v, output: %s", fd, jobOutput)
+	}
+
+	parts := strings.SplitN(jobOutput, "SUCCESS:", 2)
+	devicePath := strings.TrimSpace(parts[1])
+	output.DeviceName = devicePath
+	output.AttachedNode = targetNode
+
+	logger.Debugf("successfully connected NVMe-oF Device. Node: %s, DevicePath: %s, SubNQN: %s", targetNode, devicePath, fd.SubNQN)
+	return output, nil
+}
+
+// disconnectOSDDevice runs a job to disconnect an NVMe-oF device from the target node
+func (r *ReconcileNvmeOfStorage) disconnectOSDDevice(namespace string, fabricDeviceInfo cephv1.FabricDevice) (string, error) {
+	jobCode := fmt.Sprintf(nvmeofToolCode, "disconnect", "", "", fabricDeviceInfo.SubNQN)
+	jobOutput, err := RunJob(r.opManagerContext, r.context.Clientset, namespace, fabricDeviceInfo.AttachedNode, jobCode)
+	if err != nil || !strings.Contains(jobOutput, "SUCCESS:") {
+		return jobOutput, fmt.Errorf("failed to disconnect NVMe-oF device. fd: %v, output: %s", fabricDeviceInfo, jobOutput)
+	}
+
+	logger.Debugf("successfully disconnected NVMe-oF Device. Node: %s, SubNQN: %s, Output: %s", fabricDeviceInfo.AttachedNode, fabricDeviceInfo.SubNQN, jobOutput)
+	return jobOutput, nil
 }
 
 func isOSDPod(labels map[string]string) bool {
