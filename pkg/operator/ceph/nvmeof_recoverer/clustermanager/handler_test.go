@@ -14,7 +14,7 @@ func TestReassignOSD(t *testing.T) {
 	opManagerContext := context.TODO()
 	cm := New(ctx, opManagerContext)
 
-	t.Run("TestGetNextAttachableHost", func(t *testing.T) {
+	t.Run("TestGetNextAttachableNode", func(t *testing.T) {
 		nvmeofstorage := &cephv1.NvmeOfStorage{
 			Spec: cephv1.NvmeOfStorageSpec{
 				Devices: []cephv1.FabricDevice{
@@ -57,31 +57,31 @@ func TestReassignOSD(t *testing.T) {
 
 	t.Run("TestGetNextAttachableHostErrorHandling", func(t *testing.T) {
 		osdID := "invalidValue"
-		actualNextNode, err := cm.GetNextAttachableHost(osdID)
+		actualNextNode, err := cm.GetNextAttachableNode(osdID)
 		expectedNextNode := ""
 		require.Error(t, err)
 		require.Equal(t, expectedNextNode, actualNextNode)
 
 		osdID = "0"
-		actualNextNode, err = cm.GetNextAttachableHost(osdID)
+		actualNextNode, err = cm.GetNextAttachableNode(osdID)
 		expectedNextNode = "node3"
 		require.Nil(t, err)
 		require.Equal(t, expectedNextNode, actualNextNode)
 
 		osdID = "3"
-		actualNextNode, err = cm.GetNextAttachableHost(osdID)
+		actualNextNode, err = cm.GetNextAttachableNode(osdID)
 		expectedNextNode = "node2"
 		require.Nil(t, err)
 		require.Equal(t, expectedNextNode, actualNextNode)
 
 		osdID = "1"
-		actualNextNode, err = cm.GetNextAttachableHost(osdID)
+		actualNextNode, err = cm.GetNextAttachableNode(osdID)
 		expectedNextNode = ""
 		require.Nil(t, err)
 		require.Equal(t, expectedNextNode, actualNextNode)
 
 		osdID = "2"
-		actualNextNode, err = cm.GetNextAttachableHost(osdID)
+		actualNextNode, err = cm.GetNextAttachableNode(osdID)
 		expectedNextNode = ""
 		require.Nil(t, err)
 		require.Equal(t, expectedNextNode, actualNextNode)
