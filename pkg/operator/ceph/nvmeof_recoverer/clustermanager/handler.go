@@ -100,11 +100,11 @@ func (cm *ClusterManager) AddOSD(osdID string, nvmeofstorage *cephv1.NvmeOfStora
 }
 
 // GetNextAttachableHost returns the node with the least number of OSDs attached to it
-func (cm *ClusterManager) GetNextAttachableHost(osdID string) (string, error) {
+func (cm *ClusterManager) GetNextAttachableHost(osdID string) string {
 	output := ""
 	faultyNode, err := cm.fabricMap.FindNodeByOSD(osdID)
 	if err != nil {
-		return output, errors.New(fmt.Sprintf("Wrong OSD ID"))
+		panic(fmt.Sprintf("OSD %s is not attached to any node", osdID))
 	}
 
 	// Find the node with the least number of OSDs
@@ -121,7 +121,7 @@ func (cm *ClusterManager) GetNextAttachableHost(osdID string) (string, error) {
 	// Remove the fault node from the map
 	cm.fabricMap.RemoveOSD(osdID, faultyNode)
 
-	return output, nil
+	return output
 }
 
 func (cm *ClusterManager) ConnectOSDDeviceToHost(namespace, targetHost string, fabricDeviceInfo cephv1.FabricDevice) (cephv1.FabricDevice, error) {
