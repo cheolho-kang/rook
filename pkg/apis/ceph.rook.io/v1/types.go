@@ -3247,9 +3247,10 @@ type NvmeOfStorage struct {
 }
 
 type NvmeOfStorageSpec struct {
-	Name    string         `json:"name"`
-	IP      string         `json:"ip"`
-	Devices []FabricDevice `json:"devices"`
+	Name        string         `json:"name"`
+	IP          string         `json:"ip"`
+	Devices     []FabricDevice `json:"devices"`
+	ClusterName string         `json:"clusterName,omitempty"`
 }
 
 // NvmeOfStorageStatus defines the observed state of NvmeOStorage
@@ -3263,8 +3264,6 @@ type FabricDevice struct {
 	Port         int    `json:"port"`
 	AttachedNode string `json:"attachedNode"`
 	DeviceName   string `json:"deviceName"`
-	OsdID        string `json:"osdID,omitempty"`
-	ClusterName  string `json:"clusterName,omitempty"`
 }
 
 // NvmeOfStorageList contains a list of NvmeOfOSD

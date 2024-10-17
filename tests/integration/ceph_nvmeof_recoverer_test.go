@@ -84,29 +84,27 @@ func (s *NvmeofRecovererSuite) TestBasicSingleFabricDomain() {
 	node1 := "node1"
 	node2 := "node2"
 	s.nvmeStorage = cephv1.NvmeOfStorageSpec{
-		Name: "nvmeofstorage-pbssd1",
-		IP:   "192.168.100.11",
+		Name:        "nvmeofstorage-pbssd1",
+		IP:          "192.168.100.11",
+		ClusterName: s.namespace,
 		Devices: []cephv1.FabricDevice{
 			{
 				SubNQN:       "nqn.2024-07.com.example:storage1",
 				Port:         1152,
 				AttachedNode: node1,
 				DeviceName:   "/dev/nvme0n1",
-				ClusterName:  s.namespace,
 			},
 			{
 				SubNQN:       "nqn.2024-07.com.example:storage2",
 				Port:         1152,
 				AttachedNode: node2,
 				DeviceName:   "/dev/nvme1n1",
-				ClusterName:  s.namespace,
 			},
 			{
 				SubNQN:       "nqn.2024-07.com.example:storage3",
 				Port:         1152,
 				AttachedNode: node1,
 				DeviceName:   "/dev/nvme2n1",
-				ClusterName:  s.namespace,
 			},
 		},
 	}

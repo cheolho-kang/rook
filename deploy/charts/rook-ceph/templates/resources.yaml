@@ -13155,17 +13155,15 @@ spec:
               type: object
             spec:
               properties:
+                clusterName:
+                  type: string
                 devices:
                   items:
                     description: FabricDevice represents a fabric device connected to a node
                     properties:
                       attachedNode:
                         type: string
-                      clusterName:
-                        type: string
                       deviceName:
-                        type: string
-                      osdID:
                         type: string
                       port:
                         type: integer

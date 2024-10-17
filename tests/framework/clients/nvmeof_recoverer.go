@@ -70,14 +70,14 @@ spec:
   ip: ` + resource.IP
 	if len(resource.Devices) > 0 {
 		nvmeofstorageResource += `
-  devices:`
+	clusterName: "` + resource.ClusterName + `"
+	devices:`
 		for _, device := range resource.Devices {
 			nvmeofstorageResource += `
     - subnqn: "` + device.SubNQN + `"
       port: ` + fmt.Sprintf("%d", device.Port) + `
       attachedNode: "` + device.AttachedNode + `"
-      deviceName: "` + device.DeviceName + `"
-      clusterName: "` + device.ClusterName + `"`
+      deviceName: "` + device.DeviceName + `"`
 		}
 	}
 	err := n.k8sh.ResourceOperation("apply", nvmeofstorageResource)
