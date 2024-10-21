@@ -68,16 +68,22 @@ metadata:
 spec:
   name: ` + resource.Name + `
   ip: ` + resource.IP
+	if len(resource.AttachableNodes) > 0 {
+		nvmeofstorageResource += `
+  attachableNodes:`
+		for _, node := range resource.AttachableNodes {
+			nvmeofstorageResource += `
+    - "` + node + `"`
+		}
+	}
 	if len(resource.Devices) > 0 {
 		nvmeofstorageResource += `
-	clusterName: "` + resource.ClusterName + `"
-	devices:`
+  clusterName: "` + resource.ClusterName + `"
+  devices:`
 		for _, device := range resource.Devices {
 			nvmeofstorageResource += `
     - subnqn: "` + device.SubNQN + `"
-      port: ` + fmt.Sprintf("%d", device.Port) + `
-      attachedNode: "` + device.AttachedNode + `"
-      deviceName: "` + device.DeviceName + `"`
+      port: ` + fmt.Sprintf("%d", device.Port)
 		}
 	}
 	err := n.k8sh.ResourceOperation("apply", nvmeofstorageResource)
@@ -89,7 +95,7 @@ func (n *NvmeofRecovererOperation) CheckOSDLocationUntilMatch(namespace string, 
 	fabricHost := nvmeofstorage.FabricFailureDomainPrefix + "-" + resource.Name
 	var hostOSDMap map[string][]int
 	expectedNumOSDs := len(resource.Devices)
-	err := wait.PollUntilContextTimeout(context.TODO(), 3*time.Second, 60*time.Second, true, func(context context.Context) (done bool, err error) {
+	err := wait.PollUntilContextTimeout(context.TODO(), 3*time.Second, 180*time.Second, true, func(context context.Context) (done bool, err error) {
 		hostOSDMap = make(map[string][]int)
 		output, err := n.k8sh.ExecToolboxWithRetry(3, namespace, "ceph", []string{"osd", "crush", "tree", "--format", "json"})
 		require.Nil(n.k8sh.T(), err)

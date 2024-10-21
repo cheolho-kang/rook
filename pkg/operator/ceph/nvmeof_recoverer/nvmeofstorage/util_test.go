@@ -7,7 +7,7 @@ import (
 )
 
 func TestRelocateOSD(t *testing.T) {
-	fm := NewFabricMap()
+	fm := NewFabricMap([]string{"node1", "node2", "node3"})
 	fds := []FabricDescriptor{
 		{
 			SubNQN:       "com.example:subnqn0",

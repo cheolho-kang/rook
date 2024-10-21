@@ -29,7 +29,6 @@ import (
 
 	cephv1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1"
 	"github.com/rook/rook/pkg/clusterd"
-	cephclient "github.com/rook/rook/pkg/daemon/ceph/client"
 	"github.com/rook/rook/pkg/operator/ceph/cluster/osd"
 	opcontroller "github.com/rook/rook/pkg/operator/ceph/controller"
 	"github.com/rook/rook/pkg/operator/ceph/reporting"
@@ -101,7 +100,6 @@ func newReconciler(mgr manager.Manager, context *clusterd.Context, opManagerCont
 		scheme:           mgr.GetScheme(),
 		opManagerContext: opManagerContext,
 		recorder:         mgr.GetEventRecorderFor("rook-" + controllerName),
-		fabricMap:        NewFabricMap(),
 		nvmeOfStorage:    &cephv1.NvmeOfStorage{},
 	}
 }
@@ -172,16 +170,37 @@ func (r *ReconcileNvmeOfStorage) getSystemEvent(e string) ControllerState {
 	panic("wrong event type")
 }
 
-func (r *ReconcileNvmeOfStorage) initFabricMap(context context.Context, request reconcile.Request) error {
+func (r *ReconcileNvmeOfStorage) initFabricMap(request reconcile.Request) error {
 	// Fetch the NvmeOfStorage CRD object
 	if err := r.client.Get(r.opManagerContext, request.NamespacedName, r.nvmeOfStorage); err != nil {
 		logger.Errorf("unable to fetch NvmeOfStorage, err: %v", err)
 		return err
 	}
 
-	r.reconstructCRUSHMap(context, request.Namespace)
+	// Initialize the fabric map
+	r.fabricMap = NewFabricMap(r.nvmeOfStorage.Spec.AttachableNodes)
 
-	return nil
+	// Connect the device to the target node
+	for _, device := range r.nvmeOfStorage.Spec.Devices {
+		fd := FabricDescriptor{
+			Address: r.nvmeOfStorage.Spec.IP,
+			SubNQN:  device.SubNQN,
+			Port:    strconv.Itoa(device.Port),
+		}
+		targetNode := r.fabricMap.GetNextAttachableNode(fd)
+		deviceName, err := r.connectOSDDeviceToNode(request.Namespace, targetNode, fd)
+		if err != nil {
+			panic(fmt.Sprintf("failed to connect device with SubNQN %s to node %s: %v",
+				fd.SubNQN, fd.AttachedNode, err))
+		}
+
+		// Add the device descriptor that is connected to the target node
+		fd.AttachedNode = targetNode
+		fd.DeviceName = deviceName
+		r.fabricMap.AddDescriptor(fd)
+	}
+
+	return r.updateCephClusterCR(request.Namespace)
 }
 
 func (r *ReconcileNvmeOfStorage) tryRelocateDevice(request reconcile.Request) error {
@@ -213,7 +232,7 @@ func (r *ReconcileNvmeOfStorage) Reconcile(context context.Context, request reco
 		if state != INITIALIZATION {
 			panic("impossible")
 		}
-		err = r.initFabricMap(context, request)
+		err = r.initFabricMap(request)
 		state = ACTIVATED
 	} else if event == OSD_STATE_CHANGED {
 		if state == INITIALIZATION {
@@ -226,61 +245,6 @@ func (r *ReconcileNvmeOfStorage) Reconcile(context context.Context, request reco
 	}
 
 	return reporting.ReportReconcileResult(logger, r.recorder, request, r.nvmeOfStorage, reconcile.Result{}, err)
-}
-
-func (r *ReconcileNvmeOfStorage) reconstructCRUSHMap(context context.Context, namespace string) {
-	// Retrieve the nvmeofstorage CR to update the CRUSH map
-	for i := range r.nvmeOfStorage.Spec.Devices {
-		device := &r.nvmeOfStorage.Spec.Devices[i]
-		// Get OSD pods with label "app=rook-ceph-osd"
-		var clusterName string
-		opts := metav1.ListOptions{
-			LabelSelector: "app=" + osd.AppName,
-		}
-		pods := r.getPods(context, namespace, opts)
-		// Find the osd id and cluster name for the fabric device listed in the nvmeofstorage CR
-		for _, pod := range pods.Items {
-			for _, envVar := range pod.Spec.Containers[0].Env {
-				if pod.Spec.NodeName == device.AttachedNode && envVar.Name == "ROOK_BLOCK_PATH" && envVar.Value == device.DeviceName {
-					osdID := pod.Labels["ceph-osd-id"]
-					clusterName = pod.Labels["app.kubernetes.io/part-of"]
-					crushRoot := pod.Labels["topology-location-root"]
-
-					// Update CRUSH map for OSD relocation to fabric failure domain
-					fabricHost := FabricFailureDomainPrefix + "-" + r.nvmeOfStorage.Spec.Name
-					clusterInfo := cephclient.AdminClusterInfo(context, namespace, clusterName)
-					cmd := []string{"osd", "crush", "move", fmt.Sprintf("osd.%s", osdID), fmt.Sprintf("root=%s", crushRoot), fmt.Sprintf("host=%s", fabricHost)}
-					exec := cephclient.NewCephCommand(r.context, clusterInfo, cmd)
-					exec.JsonOutput = true
-					buf, err := exec.Run()
-					if err != nil {
-						logger.Error(err, "Failed to move osd", "osdID", osdID, "srcHost", device.AttachedNode,
-							"destHost", fabricHost, "result", string(buf))
-						panic(err)
-					}
-					logger.Debugf("Successfully updated CRUSH Map. osdID: %s, srcHost: %s, destHost: %s",
-						osdID, device.AttachedNode, fabricHost)
-
-					// Update the OSD deployment depending on the nvmeofstorage CR
-					r.fabricMap.AddDescriptor(FabricDescriptor{
-						Address:      r.nvmeOfStorage.Spec.IP,
-						Port:         strconv.Itoa(device.Port),
-						SubNQN:       device.SubNQN,
-						AttachedNode: device.AttachedNode,
-						ClusterName:  clusterName,
-					})
-				}
-			}
-		}
-	}
-}
-
-func (r *ReconcileNvmeOfStorage) getPods(context context.Context, namespace string, opts metav1.ListOptions) *corev1.PodList {
-	pods, err := r.context.Clientset.CoreV1().Pods(namespace).List(context, opts)
-	if err != nil || len(pods.Items) == 0 {
-		panic(err)
-	}
-	return pods
 }
 
 // findAttachedDevice finds the attached device for the given OSD ID

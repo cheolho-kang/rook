@@ -38,7 +38,6 @@ type TestCephSettings struct {
 	UseCrashPruner              bool
 	MultipleMgrs                bool
 	SkipOSDCreation             bool
-	NodeDeviceMappings          map[string][]string
 	EnableDiscovery             bool
 	IsExternal                  bool
 	SkipClusterCleanup          bool

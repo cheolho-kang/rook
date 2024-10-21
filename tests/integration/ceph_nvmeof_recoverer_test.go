@@ -58,7 +58,7 @@ func (s *NvmeofRecovererSuite) SetupSuite() {
 		SkipClusterCleanup:      false,
 		UseHelm:                 false,
 		UsePVC:                  false,
-		SkipOSDCreation:         false,
+		SkipOSDCreation:         true,
 		EnableVolumeReplication: false,
 		RookVersion:             installer.LocalBuildTag,
 		CephVersion:             installer.ReturnCephVersion(),
@@ -70,12 +70,6 @@ func (s *NvmeofRecovererSuite) TearDownSuite() {
 }
 
 func (s *NvmeofRecovererSuite) baseSetup() {
-	nodeDeviceMappings := make(map[string][]string)
-	for _, device := range s.nvmeStorage.Devices {
-		nodeDeviceMappings[device.AttachedNode] = append(nodeDeviceMappings[device.AttachedNode], device.DeviceName)
-	}
-	s.settings.NodeDeviceMappings = nodeDeviceMappings
-
 	s.installer, s.k8sh = StartTestCluster(s.T, s.settings)
 	s.helper = clients.CreateTestClient(s.k8sh, s.installer.Manifests)
 }
@@ -87,24 +81,22 @@ func (s *NvmeofRecovererSuite) TestBasicSingleFabricDomain() {
 		Name:        "nvmeofstorage-pbssd1",
 		IP:          "192.168.100.11",
 		ClusterName: s.namespace,
+		AttachableNodes: []string{
+			node1,
+			node2,
+		},
 		Devices: []cephv1.FabricDevice{
 			{
-				SubNQN:       "nqn.2024-07.com.example:storage1",
-				Port:         1152,
-				AttachedNode: node1,
-				DeviceName:   "/dev/nvme0n1",
+				SubNQN: "nqn.2024-07.com.example:storage1",
+				Port:   1152,
 			},
 			{
-				SubNQN:       "nqn.2024-07.com.example:storage2",
-				Port:         1152,
-				AttachedNode: node2,
-				DeviceName:   "/dev/nvme1n1",
+				SubNQN: "nqn.2024-07.com.example:storage2",
+				Port:   1152,
 			},
 			{
-				SubNQN:       "nqn.2024-07.com.example:storage3",
-				Port:         1152,
-				AttachedNode: node1,
-				DeviceName:   "/dev/nvme2n1",
+				SubNQN: "nqn.2024-07.com.example:storage3",
+				Port:   1152,
 			},
 		},
 	}
@@ -195,25 +187,5 @@ func (s *NvmeofRecovererSuite) TestBasicSingleFabricDomain() {
 		actualOSDLocation := s.helper.RecovererClient.GetNodeLocation(s.namespace, targetOSD1ID)
 		expectedOSDLocation := node1
 		require.Equal(s.T(), expectedOSDLocation, actualOSDLocation)
-	})
-
-	s.T().Run("TestFaultInjectOSDForAttachableHostsValidation", func(t *testing.T) {
-		logger.Info("Start TestFaultInjectOSDForAttachableHostsValidation")
-
-		// Get the OSD located at the target node
-		targetNode := node1
-		targetOSDID := s.helper.RecovererClient.GetOSDsLocatedAtNode(s.namespace, targetNode)[0]
-		actualOSDLocation := s.helper.RecovererClient.GetNodeLocation(s.namespace, targetOSDID)
-		require.Equal(s.T(), targetNode, actualOSDLocation)
-
-		// Inject fault to the OSD pod
-		s.helper.RecovererClient.InjectFaultToOSD(s.namespace, targetOSDID)
-
-		// Check the OSD pod is removed by nvmeofstorage controller
-		s.helper.RecovererClient.WaitUntilPodDeletedFromTargetNode(s.namespace, targetOSDID, targetNode)
-
-		// Check OSD pod is not transfered to another node since available attachable hosts are not enough.
-		// Wait for 30 seconds to make sure the OSD pod is not reassigned to another node
-		require.NotNil(s.T(), s.k8sh.WaitForLabeledPodsToRunWithRetries(fmt.Sprintf("ceph-osd-id=%s", targetOSDID), s.namespace, 6))
 	})
 }

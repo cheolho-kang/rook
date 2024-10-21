@@ -13155,23 +13155,21 @@ spec:
               type: object
             spec:
               properties:
+                attachableNodes:
+                  items:
+                    type: string
+                  type: array
                 clusterName:
                   type: string
                 devices:
                   items:
                     description: FabricDevice represents a fabric device connected to a node
                     properties:
-                      attachedNode:
-                        type: string
-                      deviceName:
-                        type: string
                       port:
                         type: integer
                       subnqn:
                         type: string
                     required:
-                      - attachedNode
-                      - deviceName
                       - port
                       - subnqn
                     type: object
@@ -13181,6 +13179,7 @@ spec:
                 name:
                   type: string
               required:
+                - attachableNodes
                 - devices
                 - ip
                 - name
