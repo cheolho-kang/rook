@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -180,13 +181,27 @@ func (r *ReconcileNvmeOfStorage) initFabricMap(request reconcile.Request) error 
 	// Initialize the fabric map
 	r.fabricMap = NewFabricMap(r.nvmeOfStorage.Spec.AttachableNodes)
 
-	// Connect the device to the target node
+	// Update existing devices to the FabricMap
+	if err := r.updateExistingDevices(request.Namespace); err != nil {
+		logger.Errorf("failed to update existing devices. err: %v", err)
+		return err
+	}
+
+	// Filter out unconnected devices from the NvmeOfStorage CR
+	var unconnectedDevices []FabricDescriptor
 	for _, device := range r.nvmeOfStorage.Spec.Devices {
-		fd := FabricDescriptor{
-			Address: r.nvmeOfStorage.Spec.IP,
-			SubNQN:  device.SubNQN,
-			Port:    strconv.Itoa(device.Port),
+		if _, err := r.fabricMap.FindDescriptorBySubNQN(device.SubNQN); err != nil {
+			logger.Debugf("device with SubNQN %s is not connected to any node", device.SubNQN)
+			unconnectedDevices = append(unconnectedDevices, FabricDescriptor{
+				Address: r.nvmeOfStorage.Spec.IP,
+				SubNQN:  device.SubNQN,
+				Port:    strconv.Itoa(device.Port),
+			})
 		}
+	}
+
+	// Connect the device to the target node
+	for _, fd := range unconnectedDevices {
 		targetNode := r.fabricMap.GetNextAttachableNode(fd)
 		deviceName, err := r.connectOSDDeviceToNode(request.Namespace, targetNode, fd)
 		if err != nil {
@@ -229,9 +244,6 @@ func (r *ReconcileNvmeOfStorage) Reconcile(context context.Context, request reco
 	event := r.getSystemEvent(request.Name)
 	var err error
 	if event == CR_UPDATED {
-		if state != INITIALIZATION {
-			panic("impossible")
-		}
 		err = r.initFabricMap(request)
 		state = ACTIVATED
 	} else if event == OSD_STATE_CHANGED {
@@ -320,6 +332,48 @@ func (r *ReconcileNvmeOfStorage) reassignFaultedOSDDevice(namespace string, fd F
 	fd.DeviceName = output
 	r.fabricMap.AddDescriptor(fd)
 	return
+}
+
+// updateExistingDevices updates the FabricMap with the existing devices in the cluster
+func (r *ReconcileNvmeOfStorage) updateExistingDevices(namespace string) error {
+	nodes, err := r.context.Clientset.CoreV1().Nodes().List(r.opManagerContext, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	// Get the list of SubNQNs from the NvmeOfStorage CR
+	subnqns := make([]string, len(r.nvmeOfStorage.Spec.Devices))
+	for i, device := range r.nvmeOfStorage.Spec.Devices {
+		subnqns[i] = device.SubNQN
+	}
+
+	// Check the device that is connected to the node using SubNQNs
+	for _, node := range nodes.Items {
+		deviceBySubNQN, err := r.checkNvmeConnections(namespace, node.Name, subnqns)
+		if err != nil {
+			return err
+		}
+
+		for subnqn, deviceName := range deviceBySubNQN {
+			for _, device := range r.nvmeOfStorage.Spec.Devices {
+				if device.SubNQN != subnqn {
+					continue
+				}
+
+				// Add the device descriptor to the FabricMap if it is already connected
+				r.fabricMap.AddDescriptor(FabricDescriptor{
+					AttachedNode: node.Name,
+					SubNQN:       subnqn,
+					DeviceName:   deviceName,
+					Address:      r.nvmeOfStorage.Spec.IP,
+					Port:         strconv.Itoa(device.Port),
+				})
+			}
+		}
+	}
+
+	logger.Info("successfully updated existing devices.")
+	return nil
 }
 
 // updateCephClusterCR updates the CephCluster CR based on the fabric map,
@@ -437,6 +491,27 @@ func (r *ReconcileNvmeOfStorage) disconnectOSDDevice(namespace string, fd Fabric
 
 	logger.Debugf("successfully disconnected NVMe-oF Device. Node: %s, SubNQN: %s, Output: %s", fd.AttachedNode, fd.SubNQN, jobOutput)
 	return jobOutput, nil
+}
+
+// checkNvmeConnections runs a job to check the connection status of NVMe-oF devices
+func (r *ReconcileNvmeOfStorage) checkNvmeConnections(namespace, targetHost string, subnqns []string) (map[string]string, error) {
+	jobCode := fmt.Sprintf(deviceConnectCheckCode, strings.Join(subnqns, ","))
+	output, err := RunJob(r.opManagerContext, r.context.Clientset, namespace, targetHost, jobCode)
+	if err != nil {
+		return nil, err
+	}
+
+	re := regexp.MustCompile(`SUCCESS:\s*(.+?),\s*(.+)`)
+	result := make(map[string]string)
+	for _, line := range strings.Split(output, "\n") {
+		matches := re.FindStringSubmatch(line)
+		if len(matches) == 3 {
+			subnqn := strings.TrimSpace(matches[1])
+			device := strings.TrimSpace(matches[2])
+			result[subnqn] = device
+		}
+	}
+	return result, nil
 }
 
 func isOSDPod(labels map[string]string) bool {

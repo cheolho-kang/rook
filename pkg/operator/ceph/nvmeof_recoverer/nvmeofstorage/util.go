@@ -71,6 +71,31 @@ if mode == 'connect':
 elif mode == 'disconnect':
     disconnect_nvme(subnqn)
 `
+	deviceConnectCheckCode = `
+import json
+import subprocess
+
+def check_nvme_connections(subnqn_list):
+    result = subprocess.run(['nvme', 'list', '-o', 'json'], stdout=subprocess.PIPE)
+    devices = json.loads(result.stdout).get('Devices', [])
+    for subnqn in subnqn_list:
+        connected_device = None
+        for device in devices:
+            device_path = device.get('DevicePath')
+            if device_path:
+                id_ctrl_result = subprocess.run(['nvme', 'id-ctrl', device_path, '-o', 'json'], stdout=subprocess.PIPE)
+                id_ctrl_info = json.loads(id_ctrl_result.stdout)
+                if id_ctrl_info.get('subnqn') == subnqn:
+                    connected_device = device_path
+                    break
+        if connected_device:
+            print(f'SUCCESS: {subnqn}, {connected_device}')
+        else:
+            print(f'FAILED: {subnqn} is not connected to any device')
+
+subnqn_list = "%s".split(',')
+check_nvme_connections(subnqn_list)
+`
 )
 
 // FabricDescriptor contains information about an OSD that is attached to a node
