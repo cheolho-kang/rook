@@ -137,23 +137,24 @@ func (s *NvmeofRecovererSuite) TestBasicSingleFabricDomain() {
 	s.T().Run("TestFaultInjectMultipleOSD", func(t *testing.T) {
 		logger.Info("Start TestFaultInjectMultipleOSD")
 
+		// Find the node with the highest number of OSDs among the attachble nodes
+		targetNode := s.helper.RecovererClient.GetNodeWithMostOSDs(s.namespace)
+
 		// Get the OSDs located at the target node
-		targetNode1 := node2
-		targetNode2 := node2
-		targetOSD1ID := s.helper.RecovererClient.GetOSDsLocatedAtNode(s.namespace, targetNode1)[0]
-		targetOSD2ID := s.helper.RecovererClient.GetOSDsLocatedAtNode(s.namespace, targetNode2)[1]
+		targetOSD1ID := s.helper.RecovererClient.GetOSDsLocatedAtNode(s.namespace, targetNode)[0]
+		targetOSD2ID := s.helper.RecovererClient.GetOSDsLocatedAtNode(s.namespace, targetNode)[1]
 		actualOSD1Location := s.helper.RecovererClient.GetNodeLocation(s.namespace, targetOSD1ID)
 		actualOSD2Location := s.helper.RecovererClient.GetNodeLocation(s.namespace, targetOSD2ID)
-		require.Equal(s.T(), targetNode1, actualOSD1Location)
-		require.Equal(s.T(), targetNode2, actualOSD2Location)
+		require.Equal(s.T(), targetNode, actualOSD1Location)
+		require.Equal(s.T(), targetNode, actualOSD2Location)
 
 		// Inject faults to the OSD pods on the same time
 		s.helper.RecovererClient.InjectFaultToOSD(s.namespace, targetOSD1ID)
 		s.helper.RecovererClient.InjectFaultToOSD(s.namespace, targetOSD2ID)
 
 		// Check the OSD pods are removed by nvmeofstorage controller
-		s.helper.RecovererClient.WaitUntilPodDeletedFromTargetNode(s.namespace, targetOSD1ID, targetNode1)
-		s.helper.RecovererClient.WaitUntilPodDeletedFromTargetNode(s.namespace, targetOSD2ID, targetNode2)
+		s.helper.RecovererClient.WaitUntilPodDeletedFromTargetNode(s.namespace, targetOSD1ID, targetNode)
+		s.helper.RecovererClient.WaitUntilPodDeletedFromTargetNode(s.namespace, targetOSD2ID, targetNode)
 
 		// Check OSD pods are reassgined to another node
 		require.Nil(s.T(), s.k8sh.WaitForPodCount(fmt.Sprintf("ceph-osd-id=%s", targetOSD1ID), s.namespace, 1))
@@ -164,23 +165,29 @@ func (s *NvmeofRecovererSuite) TestBasicSingleFabricDomain() {
 		// If multiple OSDs are faulted simultaneously,
 		// the OSDs that have not yet been processed can be reattached to the same node during the reassgined OSD operation.
 		// Check if all of the OSDs are reassigned to the same node
-		if (actualOSD1Location == targetNode1) && (actualOSD2Location == targetNode2) {
+		if (actualOSD1Location == targetNode) && (actualOSD2Location == targetNode) {
 			require.Fail(s.T(), "OSDs are reassigned to the same node")
 		}
 
 		// Check if any of the OSDs are reassigned to the same node
+		// Explanation: When multiple OSDs need reassignment due to faults, the operator may restart each time the CephCluster CR is updated to reflect an OSD reassignment.
+		// This can lead to cases where only partially reassigned OSDs result in faulted OSDs restarting on their original nodes if the reassignment isn't fully completed.
+		// To ensure clear and accurate testing, we re-inject faults to the OSD pod that is not reassigned to another node.
 		targetOSDID := ""
-		if actualOSD1Location == targetNode1 {
+		if actualOSD1Location == targetNode {
 			targetOSDID = targetOSD1ID
-		} else if actualOSD2Location == targetNode2 {
+		} else if actualOSD2Location == targetNode {
 			targetOSDID = targetOSD2ID
 		}
 
-		// Re-Inject faults to the OSD pod
-		s.helper.RecovererClient.InjectFaultToOSD(s.namespace, targetOSDID)
+		// Re-Inject faults to the OSD pod that is not reassigned to another node
+		if targetOSDID != "" {
+			// Inject faults to the OSD pod
+			s.helper.RecovererClient.InjectFaultToOSD(s.namespace, targetOSDID)
 
-		// Check the OSD pod is removed by nvmeofstorage controller
-		s.helper.RecovererClient.WaitUntilPodDeletedFromTargetNode(s.namespace, targetOSDID, node2)
+			// Check the OSD pod is removed by nvmeofstorage controller
+			s.helper.RecovererClient.WaitUntilPodDeletedFromTargetNode(s.namespace, targetOSDID, node2)
+		}
 
 		// Check OSD pods are reassgined to another node
 		require.Nil(s.T(), s.k8sh.WaitForPodCount(fmt.Sprintf("ceph-osd-id=%s", targetOSDID), s.namespace, 1))

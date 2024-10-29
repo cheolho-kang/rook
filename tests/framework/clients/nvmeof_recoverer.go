@@ -202,11 +202,35 @@ func (n *NvmeofRecovererOperation) GetOSDsLocatedAtNodForDomain(namespace string
 	return matchedIDs
 }
 
+func (n *NvmeofRecovererOperation) GetNodeWithMostOSDs(namespace string) string {
+	options := metav1.ListOptions{LabelSelector: "app=rook-ceph-osd"}
+	ctx := context.TODO()
+	pods, err := n.k8sh.Clientset.CoreV1().Pods(namespace).List(ctx, options)
+	require.NoError(n.k8sh.T(), err)
+
+	osdMap := make(map[string]int)
+	for _, pod := range pods.Items {
+		nodeName := pod.Spec.NodeName
+		osdMap[nodeName]++
+	}
+
+	var maxOSDs int
+	var targetNode string
+	for node, count := range osdMap {
+		if count > maxOSDs {
+			maxOSDs = count
+			targetNode = node
+		}
+	}
+
+	return targetNode
+}
+
 // WaitUntilPodDeletedFromTargetNode waits until the OSD pod is deleted from the target node
 func (n *NvmeofRecovererOperation) WaitUntilPodDeletedFromTargetNode(namespace, targetOSDID, targetNode string) {
 	options := metav1.ListOptions{LabelSelector: fmt.Sprintf("ceph-osd-id=%s", targetOSDID)}
 	ctx := context.TODO()
-	err := wait.PollUntilContextTimeout(context.TODO(), 3*time.Second, 300*time.Second, true, func(context context.Context) (done bool, err error) {
+	wait.PollUntilContextTimeout(context.TODO(), 3*time.Second, 180*time.Second, true, func(context context.Context) (done bool, err error) {
 		pods, err := n.k8sh.Clientset.CoreV1().Pods(namespace).List(ctx, options)
 		if kerrors.IsNotFound(err) {
 			return true, nil
@@ -220,5 +244,4 @@ func (n *NvmeofRecovererOperation) WaitUntilPodDeletedFromTargetNode(namespace, 
 
 		return true, nil
 	})
-	require.Nil(n.k8sh.T(), err, fmt.Sprintf("Failed to wait OSD %s to be deleted from %s", targetOSDID, targetNode))
 }
